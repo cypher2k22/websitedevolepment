@@ -1,49 +1,40 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../AppContext';
-import { LEARNING_PATHS } from '../../curriculumData';
-
-// Flatten projects out of all technologies for a purely project-based curriculum
-const ALL_PROJECTS = [];
-Object.keys(LEARNING_PATHS).forEach(tech => {
-  const path = LEARNING_PATHS[tech];
-  ['Beginner', 'Intermediate', 'Advanced'].forEach(level => {
-    if (path.levels[level]) {
-      path.levels[level].forEach(proj => {
-        ALL_PROJECTS.push({
-          ...proj,
-          tech,
-          level,
-          icon: path.icon,
-          estTime: level === 'Beginner' ? '2-4 hours' : level === 'Intermediate' ? '5-8 hours' : '10-15 hours'
-        });
-      });
-    }
-  });
-});
+import { PROJECTS_CURRICULUM } from '../../curriculumData';
 
 function Courses() {
   const navigate = useNavigate();
-  const { user, enrollInProject, theme, addToast } = useContext(AppContext);
+  const { user, enrollInProject, isProjectLocked, theme, addToast } = useContext(AppContext);
   const [search, setSearch] = useState('');
+  const [expandedProjId, setExpandedProjId] = useState(null);
 
-  const handleEnrollClick = (proj) => {
+  const handleActionClick = (proj, isLocked, isEnrolled) => {
     if (!user) {
-      addToast('Please login to enroll in this project.', 'info');
+      addToast('Authentication required. Redirecting to login...', 'info');
       navigate('/login');
+      return;
+    }
+
+    if (isLocked) {
+      addToast('Prerequisite locked. Complete previous projects first!', 'warning');
+      return;
+    }
+
+    if (isEnrolled) {
+      navigate(`/workspace/${proj.technology}/${proj.id}/${proj.milestones[0].id}`);
       return;
     }
 
     const enrolled = enrollInProject(proj.id);
     if (enrolled) {
-      // Go to first milestone workspace
-      navigate(`/workspace/${proj.tech}/${proj.id}/${proj.milestones[0].id}`);
+      navigate(`/workspace/${proj.technology}/${proj.id}/${proj.milestones[0].id}`);
     }
   };
 
-  const filteredProjects = ALL_PROJECTS.filter(p =>
+  const filteredProjects = PROJECTS_CURRICULUM.filter(p =>
     p.title.toLowerCase().includes(search.toLowerCase()) ||
-    p.tech.toLowerCase().includes(search.toLowerCase())
+    p.technology.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -55,24 +46,23 @@ function Courses() {
       color: theme === 'dark' ? '#fff' : '#000',
       minHeight: '80vh'
     }}>
-      
-      {/* Header Info */}
-      <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+      {/* Title */}
+      <div style={{ textAlign: 'center', marginBottom: '60px' }}>
         <h1 style={{
           fontSize: '3rem',
-          fontWeight: '800',
+          fontWeight: '900',
           background: 'linear-gradient(135deg, #00d2ff, #af40ff)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           marginBottom: '15px'
         }}>
-          Project-Based Courses
+          Project Curriculum
         </h1>
-        <p style={{ color: theme === 'dark' ? '#ccc' : '#555', fontSize: '1.15rem', maxWidth: '600px', margin: '0 auto' }}>
-          Select and build developer projects. Get job-ready by practicing real code layouts.
+        <p style={{ color: theme === 'dark' ? '#ccc' : '#555', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
+          Select and construct developer projects. Get job-ready by practicing real code layouts.
         </p>
 
-        {/* Search Input */}
+        {/* Search */}
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
           <div style={{
             display: 'flex',
@@ -86,7 +76,7 @@ function Courses() {
             <span style={{ marginRight: '10px' }}>🔍</span>
             <input 
               type="text" 
-              placeholder="Search by project title or technology..."
+              placeholder="Search projects..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
@@ -106,24 +96,39 @@ function Courses() {
       {/* Grid of Projects */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
         gap: '30px'
       }}>
         {filteredProjects.map((proj) => {
+          const isLocked = isProjectLocked(proj.id);
           const isEnrolled = user?.enrolledCourses?.includes(proj.id);
           const isCompleted = user?.completedProjects?.includes(proj.id);
+          const isExpanded = expandedProjId === proj.id;
 
           return (
-            <div key={proj.id} style={{
-              background: theme === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)',
-              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.08)',
-              borderRadius: '16px',
-              padding: '30px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)'
-            }}>
+            <div 
+              key={proj.id} 
+              style={{
+                background: theme === 'dark' ? 'rgba(24, 24, 27, 0.95)' : '#fff',
+                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                borderRadius: '16px',
+                padding: '30px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
+                opacity: isLocked ? 0.6 : 1,
+                transition: 'transform 0.2s, border-color 0.2s',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                if (!isLocked) e.currentTarget.style.borderColor = '#6366f1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+              }}
+              onClick={() => setExpandedProjId(isExpanded ? null : proj.id)}
+            >
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                   <span style={{ fontSize: '2rem' }}>{proj.icon}</span>
@@ -135,36 +140,66 @@ function Courses() {
                       borderRadius: '4px',
                       fontSize: '0.75rem',
                       fontWeight: 'bold'
-                    }}>{proj.tech}</span>
+                    }}>{proj.technology}</span>
                     <span style={{
-                      background: 'rgba(175, 64, 255, 0.1)',
-                      color: '#af40ff',
+                      background: isCompleted ? 'rgba(16, 172, 132, 0.1)' : 'rgba(255,255,255,0.05)',
+                      color: isCompleted ? '#10ac84' : '#aaa',
                       padding: '4px 10px',
                       borderRadius: '4px',
                       fontSize: '0.75rem',
                       fontWeight: 'bold'
-                    }}>{proj.level}</span>
+                    }}>
+                      {isCompleted ? 'Completed ✓' : isLocked ? 'Locked 🔒' : 'Unlocked'}
+                    </span>
                   </div>
                 </div>
 
-                <h3 style={{ margin: '0 0 10px 0', fontSize: '1.3rem', fontWeight: '800' }}>{proj.title}</h3>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '1.35rem', fontWeight: '800' }}>{proj.title}</h3>
                 <p style={{ color: theme === 'dark' ? '#ccc' : '#666', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 20px 0' }}>
                   {proj.description}
                 </p>
+
+                {/* Requirements Checklist if expanded */}
+                {isExpanded && (
+                  <div style={{
+                    background: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
+                    border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                    borderRadius: '8px',
+                    padding: '20px',
+                    marginBottom: '20px'
+                  }}
+                  onClick={(e) => e.stopPropagation()} // Stop accordion toggling when checking requirements
+                  >
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: '0.95rem', color: '#6366f1' }}>Project Objectives:</h4>
+                    <p style={{ margin: '0 0 15px 0', fontSize: '0.85rem', lineHeight: '1.4', color: '#aaa' }}>{proj.objective}</p>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: '0.95rem', color: '#6366f1' }}>Requirements Checklist:</h4>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                      {proj.requirements.map(req => (
+                        <li key={req.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ color: isCompleted ? '#10ac84' : '#888' }}>{isCompleted ? '✓' : '○'}</span>
+                          <span>{req.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderTop: theme === 'dark' ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-                paddingTop: '20px',
-                marginTop: '10px'
-              }}>
+              <div 
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTop: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                  paddingTop: '20px',
+                  marginTop: '10px'
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span style={{ fontSize: '0.85rem', color: '#888', fontWeight: '500' }}>⏱️ {proj.estTime}</span>
                 
                 <button
-                  onClick={() => handleEnrollClick(proj)}
+                  onClick={() => handleActionClick(proj, isLocked, isEnrolled)}
                   style={{
                     position: 'static',
                     transform: 'none',
@@ -172,22 +207,23 @@ function Courses() {
                       ? 'none' 
                       : isEnrolled 
                         ? 'linear-gradient(135deg, #10ac84, #00ddeb)' 
-                        : 'linear-gradient(135deg, #00d2ff, #af40ff)',
+                        : 'linear-gradient(135deg, #6366f1, #4f46e5)',
                     backgroundColor: isCompleted ? 'rgba(255,255,255,0.1)' : 'transparent',
                     border: 'none',
                     borderRadius: '6px',
-                    padding: '8px 20px',
+                    padding: '10px 24px',
                     color: isCompleted ? '#888' : '#fff',
                     fontWeight: 'bold',
                     fontSize: '0.85rem',
                     cursor: isCompleted ? 'default' : 'pointer',
                     height: 'auto',
-                    minWidth: '120px'
+                    minWidth: '130px',
+                    transition: 'opacity 0.2s'
                   }}
                   disabled={isCompleted}
                 >
                   <span style={{ background: 'transparent', padding: 0 }}>
-                    {isCompleted ? 'Completed ✓' : isEnrolled ? 'Resume Learning' : 'Enroll & Start'}
+                    {isCompleted ? 'Completed ✓' : isLocked ? 'Locked 🔒' : isEnrolled ? 'Resume Project' : 'Start Project'}
                   </span>
                 </button>
               </div>

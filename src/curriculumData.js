@@ -1,309 +1,167 @@
 // src/curriculumData.js
 
-export const LEARNING_PATHS = {
-  HTML: {
-    title: 'HTML Mastery',
-    icon: '🌐',
-    description: 'Learn to structure web pages using semantic markup and best practices.',
-    levels: {
-      Beginner: [
-        {
-          id: 'html-p1',
-          title: 'Personal Profile Page',
-          description: 'Build a semantic page detailing your bio and favorite hobbies.',
-          milestones: [
-            { id: 'm1', title: 'HTML Boilerplate & Head', desc: 'Set up doctype, head elements, and metadata.' },
-            { id: 'm2', title: 'Semantic Body Structure', desc: 'Implement header, main, section, and footer elements.' },
-            { id: 'm3', title: 'Media Integration', desc: 'Add images, profile cards, and external link anchors.' }
-          ]
-        },
-        {
-          id: 'html-p2',
-          title: 'Registration Form',
-          description: 'Create an accessible registration form with field validation.',
-          milestones: [
-            { id: 'm1', title: 'Form Element setup', desc: 'Build form container, submit buttons, and method properties.' },
-            { id: 'm2', title: 'Inputs & Labels', desc: 'Map names, emails, dates, and radio inputs cleanly.' }
-          ]
-        }
-      ],
-      Intermediate: [
-        {
-          id: 'html-p3',
-          title: 'Travel Agency Website',
-          description: 'Construct a multi-section landing portal for travel packages.',
-          milestones: [
-            { id: 'm1', title: 'Navigation grid', desc: 'Map section destinations and semantic links.' }
-          ]
-        }
-      ],
-      Advanced: [
-        {
-          id: 'html-p4',
-          title: 'Interactive Calculator Layout',
-          description: 'Set up grid structures, aria-labels, and custom symbols representation.',
-          milestones: [
-            { id: 'm1', title: 'Accessibility grid', desc: 'Apply aria tags and button keys layout.' }
-          ]
-        }
-      ]
-    }
-  },
-  CSS: {
-    title: 'CSS Styling & Layouts',
-    icon: '🎨',
-    description: 'Design beautiful, responsive pages with modern Flexbox, Grid, and animations.',
-    levels: {
-      Beginner: [
-        {
-          id: 'css-p1',
-          title: 'Glassmorphic Card',
-          description: 'Design an elegant blurred card with gradients.',
-          milestones: [
-            { id: 'm1', title: 'Linear Backgrounds', desc: 'Create vivid dark background gradients.' },
-            { id: 'm2', title: 'Backdrop-filter Glass', desc: 'Apply webkit blur effects and high contrast borders.' }
-          ]
-        }
-      ],
-      Intermediate: [
-        {
-          id: 'css-p2',
-          title: 'Responsive Dashboard grid',
-          description: 'Build a dashboard that collapses fluidly on mobile.',
-          milestones: [
-            { id: 'm1', title: 'CSS Grid template', desc: 'Configure auto-fit grids.' }
-          ]
-        }
-      ],
-      Advanced: [
-        {
-          id: 'css-p3',
-          title: 'CS2 Printstream Theme Animation',
-          description: 'Construct complex conics and particle debris sweeps.',
-          milestones: [
-            { id: 'm1', title: 'Keyframe sweeps', desc: 'Animate conics and translation drift.' }
-          ]
-        }
-      ]
-    }
-  },
-  JavaScript: {
-    title: 'Core JavaScript Engine',
+export const PROJECTS_CURRICULUM = [
+  {
+    id: 'calculator-ui',
+    title: 'JavaScript Calculator UI',
+    course: 'Frontend Development',
+    technology: 'JavaScript',
+    difficulty: 'Beginner',
+    estTime: '3-4 hours',
     icon: '⚡',
-    description: 'Manipulate DOM, handle events, manage async requests, and build web logic.',
-    levels: {
-      Beginner: [
-        {
-          id: 'js-p1',
-          title: 'Interactive Calculator',
-          description: 'Implement calculations, input registers, and key validations.',
-          milestones: [
-            { id: 'm1', title: 'Event Bindings', desc: 'Bind event click listeners to pad buttons.' },
-            { id: 'm2', title: 'Evaluation Engine', desc: 'Process mathematical sequences safely.' }
-          ]
-        }
-      ],
-      Intermediate: [
-        {
-          id: 'js-p2',
-          title: 'Weather Application',
-          description: 'Fetch real-time data from weather web APIs.',
-          milestones: [
-            { id: 'm1', title: 'Fetch promises', desc: 'Integrate API keys and handle promise rejections.' }
-          ]
-        }
-      ],
-      Advanced: [
-        {
-          id: 'js-p3',
-          title: 'Music Player Engine',
-          description: 'Manage HTML5 audio stream instances and progress scrubbers.',
-          milestones: [
-            { id: 'm1', title: 'Audio events', desc: 'Sync timelines and progress bars.' }
-          ]
-        }
-      ]
-    }
-  },
-  TypeScript: {
-    title: 'Strict TypeScript Types',
-    icon: '🛡️',
-    description: 'Enforce type safety, interfaces, union types, and generic structures.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  React: {
-    title: 'React Components',
-    icon: '⚛️',
-    description: 'Build single-page web applications with components, hooks, and context APIs.',
-    levels: {
-      Beginner: [
-        {
-          id: 'react-p1',
-          title: 'Interactive Todo Application',
-          description: 'Build lists, toggles, filter states, and persistent local storage.',
-          milestones: [
-            { id: 'm1', title: 'State Arrays', desc: 'Manage todos list state.' }
-          ]
-        }
-      ],
-      Intermediate: [],
-      Advanced: []
-    }
-  },
-  'React Native': {
-    title: 'React Native Mobile',
-    icon: '📱',
-    description: 'Build native iOS and Android apps using React components.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'Node.js': {
-    title: 'Node.js Backend',
-    icon: '🟢',
-    description: 'Process files, manage streams, and execute scripts in backend environments.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'Express.js': {
-    title: 'Express.js Framework',
-    icon: '🚂',
-    description: 'Route requests, configure middle-wares, and respond with JSON APIs.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  FastAPI: {
-    title: 'FastAPI Backend',
-    icon: '🚀',
-    description: 'Build secure, asynchronous APIs in Python with auto-generated documentation.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  Python: {
-    title: 'Python Language',
-    icon: '🐍',
-    description: 'Learn lists, dicts, generators, object-oriented concepts, and files in Python.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  MongoDB: {
-    title: 'MongoDB NoSQL',
-    icon: '🍃',
-    description: 'Store document structures, filter keys, and run aggregation pipelines.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  MySQL: {
-    title: 'MySQL Relational DB',
-    icon: '🐬',
-    description: 'Define relational models, query keys, and join multiple tables.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  PostgreSQL: {
-    title: 'PostgreSQL Advanced',
-    icon: '🐘',
-    description: 'Leverage transactions, advanced indexes, and JSONB fields in Postgres.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  Git: {
-    title: 'Git Version Control',
-    icon: '🌿',
-    description: 'Track changes, manage commits, branches, merges, and resolve conflicts.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  GitHub: {
-    title: 'GitHub Collaboration',
-    icon: '🐙',
-    description: 'Manage PRs, issues, actions, and projects workflows.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'REST APIs': {
-    title: 'REST API Concepts',
-    icon: '📡',
-    description: 'Understand status codes, methods, request parameters, and responses.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  Docker: {
-    title: 'Docker Containers',
-    icon: '🐳',
-    description: 'Package apps in virtual containers with Dockerfiles and Docker Compose.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  Firebase: {
-    title: 'Firebase Suite',
-    icon: '🔥',
-    description: 'Connect Firestore, Authentication, Cloud Functions, and Hosting services.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'Tailwind CSS': {
-    title: 'Tailwind CSS styling',
-    icon: '🌊',
-    description: 'Apply atomic utilities to create layouts rapidly.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'Next.js': {
-    title: 'Next.js React Framework',
-    icon: '▲',
-    description: 'Implement Server Actions, Server Side Rendering, and App Routing.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'AI APIs': {
-    title: 'AI Integrations',
-    icon: '🤖',
-    description: 'Incorporate OpenAI, Gemini, and Claude services in fullstack applications.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'Machine Learning Basics': {
-    title: 'Machine Learning Basics',
-    icon: '🧠',
-    description: 'Understand linear regressions, classification bounds, and dataset models.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  'System Design Basics': {
-    title: 'System Design Basics',
-    icon: '🏗️',
-    description: 'Design CDNs, microservices, caches, and load balancers.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  },
-  Deployment: {
-    title: 'Cloud Deployment',
-    icon: '☁️',
-    description: 'Deploy code to Vercel, Netlify, Render, AWS, and DigitalOcean.',
-    levels: { Beginner: [], Intermediate: [], Advanced: [] }
-  }
-};
+    prereqId: null, // First project is unlocked
+    objective: 'Create a fully functional mathematical calculator with support for keyboard entry, fluid animations, and overflow boundaries.',
+    requirements: [
+      { id: 'req1', text: 'Implement key event listeners for digit pads' },
+      { id: 'req2', text: 'Construct safe parsing evaluation of equations' },
+      { id: 'req3', text: 'Establish keyboard keys binding handlers' },
+      { id: 'req4', text: 'Configure warning state on division by zero' }
+    ],
+    starterCode: {
+      'index.html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculator Project</title>
+  <style>
+    body { background: #09090b; color: #fff; font-family: system-ui; display: flex; justify-content: center; align-items: center; min-height: 80vh; margin: 0; }
+    .calc { background: #18181b; border: 1px solid #27272a; padding: 20px; border-radius: 12px; width: 280px; }
+    .display { background: #09090b; padding: 15px; border-radius: 6px; text-align: right; font-size: 1.5rem; margin-bottom: 15px; border: 1px solid #27272a; min-height: 35px; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button { background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 15px; font-size: 1.1rem; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+    button:hover { background: #3f3f46; border-color: #6366f1; }
+    button.op { background: #6366f1; border-color: #4f46e5; }
+    button.op:hover { background: #4f46e5; }
+  </style>
+</head>
+<body>
+  <div className="calc">
+    <div className="display" id="screen">0</div>
+    <div className="grid">
+      <button onclick="press('7')">7</button>
+      <button onclick="press('8')">8</button>
+      <button onclick="press('9')">9</button>
+      <button onclick="press('/')" className="op">/</button>
+      <button onclick="press('4')">4</button>
+      <button onclick="press('5')">5</button>
+      <button onclick="press('6')">6</button>
+      <button onclick="press('*')" className="op">*</button>
+      <button onclick="press('1')">1</button>
+      <button onclick="press('2')">2</button>
+      <button onclick="press('3')">3</button>
+      <button onclick="press('-')" className="op">-</button>
+      <button onclick="press('0')">0</button>
+      <button onclick="clearDisplay()">C</button>
+      <button onclick="calculate()" className="op">=</button>
+      <button onclick="press('+')" className="op">+</button>
+    </div>
+  </div>
+</body>
+</html>`,
+      'styles.css': `/* Custom overrides for the Calculator */`,
+      'script.js': `// Input state tracker
+let expression = '';
 
-// Fallback skeleton structure for empty lists to prevent dashboard break
-Object.keys(LEARNING_PATHS).forEach((key) => {
-  const levels = LEARNING_PATHS[key].levels;
-  if (!levels.Beginner || levels.Beginner.length === 0) {
-    levels.Beginner = [
-      {
-        id: `${key.toLowerCase().replace(/[^a-z0-9]/g, '')}-p1`,
-        title: `Introductory ${key} Project`,
-        description: `Explore fundamentals of ${key} through interactive tasks.`,
-        milestones: [
-          { id: 'm1', title: 'Environment Config', desc: 'Initialize basic starter files and folder trees.' },
-          { id: 'm2', title: 'Key Challenge Task', desc: 'Build the core module and verify compilation results.' }
-        ]
-      }
-    ];
+function press(val) {
+  expression += val;
+  document.getElementById('screen').innerText = expression;
+}
+
+function clearDisplay() {
+  expression = '';
+  document.getElementById('screen').innerText = '0';
+}
+
+function calculate() {
+  try {
+    const result = eval(expression);
+    document.getElementById('screen').innerText = result;
+    expression = result.toString();
+  } catch (err) {
+    document.getElementById('screen').innerText = 'Error';
+    expression = '';
   }
-  if (!levels.Intermediate || levels.Intermediate.length === 0) {
-    levels.Intermediate = [
-      {
-        id: `${key.toLowerCase().replace(/[^a-z0-9]/g, '')}-p2`,
-        title: `Intermediate ${key} Application`,
-        description: `Expand modules, configure bindings, and handle complex patterns in ${key}.`,
-        milestones: [
-          { id: 'm1', title: 'Advanced integration', desc: 'Link additional dependencies and APIs.' }
-        ]
-      }
-    ];
+}`
+    }
+  },
+  {
+    id: 'supabase-landing',
+    title: 'Supabase SaaS Landing Page',
+    course: 'Frontend Development',
+    technology: 'React',
+    difficulty: 'Intermediate',
+    estTime: '6-8 hours',
+    icon: '⚡',
+    prereqId: 'calculator-ui', // Locked until calculator is complete
+    objective: 'Build an ultra-modern, interactive marketing landing page with glassmorphic cards, testimonial grids, and dark-theme configurations.',
+    requirements: [
+      { id: 'req1', text: 'Create responsive navbar with hamburger controls' },
+      { id: 'req2', text: 'Design glassmorphic feature panels using CSS filters' },
+      { id: 'req3', text: 'Implement pricing tier cards with switchable billing cycles' },
+      { id: 'req4', text: 'Configure email newsletter form verification logic' }
+    ],
+    starterCode: {
+      'index.html': `<!DOCTYPE html>
+<html>
+<head>
+  <title>Supabase SaaS</title>
+  <style>
+    body { background: #0f0f12; color: #fff; font-family: sans-serif; margin: 0; }
+    .hero { text-align: center; padding: 80px 20px; }
+    .features { display: flex; justify-content: center; gap: 20px; padding: 40px; }
+    .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 25px; width: 280px; }
+  </style>
+</head>
+<body>
+  <div className="hero">
+    <h1>Database for Modern SaaS</h1>
+    <p>Scale without configuration bottlenecks.</p>
+  </div>
+  <div className="features">
+    <div className="card"><h3>⚡ Realtime</h3><p>Sync database keys live.</p></div>
+    <div className="card"><h3>🛡️ Auth</h3><p>JWT verification out of the box.</p></div>
+  </div>
+</body>
+</html>`,
+      'styles.css': `/* SaaS styling directives */`,
+      'script.js': `console.log("SaaS Page Script Loaded.");`
+    }
+  },
+  {
+    id: 'ai-prompt-studio',
+    title: 'AI Prompt Studio Interface',
+    course: 'AI & Data Integration',
+    technology: 'FastAPI',
+    difficulty: 'Advanced',
+    estTime: '12-15 hours',
+    icon: '🤖',
+    prereqId: 'supabase-landing', // Locked until landing page is complete
+    objective: 'Design an AI Prompt compiler where developers can run prompt templates, save presets, and inspect latency outputs.',
+    requirements: [
+      { id: 'req1', text: 'Build three-column prompt testing panels' },
+      { id: 'req2', text: 'Integrate prompt latency metric badges' },
+      { id: 'req3', text: 'Implement API key storage in localized memory' },
+      { id: 'req4', text: 'Configure parameter slider controls (temperature, top-p)' }
+    ],
+    starterCode: {
+      'index.html': `<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Prompt Studio</title>
+  <style>
+    body { background: #09090b; color: #fff; font-family: system-ui; padding: 30px; }
+    .studio-container { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+  </style>
+</head>
+<body>
+  <div className="studio-container">
+    <div><h3>Controls</h3></div>
+    <div><h3>Prompt Workspace</h3></div>
+  </div>
+</body>
+</html>`,
+      'styles.css': `/* AI controls override definitions */`,
+      'script.js': `console.log("Prompt studio ready.");`
+    }
   }
-  if (!levels.Advanced || levels.Advanced.length === 0) {
-    levels.Advanced = [
-      {
-        id: `${key.toLowerCase().replace(/[^a-z0-9]/g, '')}-p3`,
-        title: `Advanced ${key} Architecture`,
-        description: `Optimize speeds, structures, and systems in ${key}.`,
-        milestones: [
-          { id: 'm1', title: 'System-level scale', desc: 'Handle stress loads and build final submission build.' }
-        ]
-      }
-    ];
-  }
-});
+];

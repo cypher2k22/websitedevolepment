@@ -2,31 +2,12 @@ import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../AppContext';
-import { LEARNING_PATHS } from '../../curriculumData';
-
-// Flatten projects list for matching progress keys
-const ALL_PROJECTS = [];
-Object.keys(LEARNING_PATHS).forEach(tech => {
-  const path = LEARNING_PATHS[tech];
-  ['Beginner', 'Intermediate', 'Advanced'].forEach(level => {
-    if (path.levels[level]) {
-      path.levels[level].forEach(proj => {
-        ALL_PROJECTS.push({
-          ...proj,
-          tech,
-          level,
-          icon: path.icon
-        });
-      });
-    }
-  });
-});
+import { PROJECTS_CURRICULUM } from '../../curriculumData';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, theme, logout } = useContext(AppContext);
 
-  // Redirect to login if user is not authenticated
   React.useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -35,8 +16,9 @@ const Dashboard = () => {
 
   if (!user) return null;
 
-  // Find user's active enrolled projects
-  const enrolledProjects = ALL_PROJECTS.filter(p => user.enrolledCourses?.includes(p.id));
+  // Filter projects by user enrollment list
+  const enrolledProjects = PROJECTS_CURRICULUM.filter(p => user.enrolledCourses?.includes(p.id));
+  const completedCount = user.completedProjects?.length || 0;
 
   // Simulated leaderboard data
   const leaderboard = [
@@ -47,10 +29,20 @@ const Dashboard = () => {
     { rank: 5, name: 'Emma Script', xp: 1950, level: 9 }
   ].sort((a, b) => b.xp - a.xp);
 
+  // Generate detailed portfolio array
+  const portfolioProjects = PROJECTS_CURRICULUM.filter(p => user.completedProjects?.includes(p.id)).map(p => ({
+    title: p.title,
+    technology: p.technology,
+    difficulty: p.difficulty,
+    objective: p.objective,
+    date: new Date().toLocaleDateString(),
+    demoUrl: `https://codejourney.io/portfolio/${user.name}/${p.id}`
+  }));
+
   return (
     <StyledDashboard themeMode={theme}>
-      {/* Top Banner stats */}
-      <div className="stats-banner" aria-label="Student progress statistics">
+      {/* Stats row */}
+      <div className="stats-banner" aria-label="Student metrics card row">
         <div className="stat-card">
           <span className="emoji" role="img" aria-label="streak icon">🔥</span>
           <div className="stat-text">
@@ -66,18 +58,18 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="stat-card">
-          <span className="emoji" role="img" aria-label="projects completed icon">🏆</span>
+          <span className="emoji" role="img" aria-label="completion count icon">🏆</span>
           <div className="stat-text">
-            <h4>{user.completedProjects?.length || 0} Completed</h4>
+            <h4>{completedCount} Completed</h4>
             <p>Milestone Projects</p>
           </div>
         </div>
       </div>
 
       <div className="main-layout">
-        {/* Left Column: Enrolled Projects & Curricula */}
+        {/* Left: Enrolled Projects */}
         <div className="pathway-section">
-          <h2>Your Enrolled Projects</h2>
+          <h2>Your Active Projects</h2>
           
           {enrolledProjects.length > 0 ? (
             <div className="projects-grid">
@@ -86,8 +78,8 @@ const Dashboard = () => {
                 return (
                   <div key={proj.id} className="project-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                      <span className="tech-badge">{proj.tech}</span>
-                      <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 'bold' }}>{proj.level}</span>
+                      <span className="tech-badge">{proj.technology}</span>
+                      <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 'bold' }}>{proj.difficulty}</span>
                     </div>
                     
                     <h3 style={{ margin: '0 0 10px 0', fontSize: '1.25rem' }}>{proj.title}</h3>
@@ -95,7 +87,7 @@ const Dashboard = () => {
                       {proj.description}
                     </p>
 
-                    {/* Progress Bar */}
+                    {/* Progress Fill */}
                     <div className="progress-container" style={{ marginBottom: '20px' }}>
                       <div className="progress-labels" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#888', marginBottom: '4px' }}>
                         <span>Progress</span>
@@ -108,19 +100,9 @@ const Dashboard = () => {
 
                     <button 
                       className="resume-btn"
-                      onClick={() => navigate(`/workspace/${proj.tech}/${proj.id}/${proj.milestones[0].id}`)}
-                      style={{
-                        width: '100%',
-                        backgroundImage: 'linear-gradient(135deg, #00d2ff, #af40ff)',
-                        border: 'none',
-                        color: '#fff',
-                        fontWeight: 'bold',
-                        padding: '10px',
-                        borderRadius: '6px',
-                        cursor: 'pointer'
-                      }}
+                      onClick={() => navigate(`/workspace/${proj.technology}/${proj.id}/${proj.milestones[0].id}`)}
                     >
-                      {progressPercent === 100 ? 'Review Project' : 'Resume Project'}
+                      {progressPercent === 100 ? 'Review Code' : 'Resume Code'}
                     </button>
                   </div>
                 );
@@ -131,26 +113,14 @@ const Dashboard = () => {
               <span style={{ fontSize: '3rem' }}>🚀</span>
               <h3>No enrolled projects yet</h3>
               <p>Explore the project catalogue to choose your first milestone!</p>
-              <button 
-                onClick={() => navigate('/courses')}
-                style={{
-                  backgroundImage: 'linear-gradient(135deg, #00d2ff, #af40ff)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '10px 24px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  marginTop: '15px'
-                }}
-              >
+              <button onClick={() => navigate('/courses')} className="browse-btn">
                 Browse Projects
               </button>
             </div>
           )}
         </div>
 
-        {/* Right Column: Gamification & Profile */}
+        {/* Right: Leaderboards & Portfolios */}
         <div className="gamification-sidebar">
           {/* Leaderboard Card */}
           <div className="sidebar-card">
@@ -169,31 +139,34 @@ const Dashboard = () => {
           {/* Downloadable Portfolio Generation */}
           <div className="sidebar-card portfolio-generator">
             <h3>Downloadable Portfolio</h3>
-            {user.completedProjects?.length > 0 ? (
+            {portfolioProjects.length > 0 ? (
               <div>
                 <p style={{ fontSize: '0.85rem', color: '#ccc', marginBottom: '15px' }}>
                   Generate your professional portfolio based on your completed CodeJourney projects.
                 </p>
+                
+                <div className="portfolio-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
+                  {portfolioProjects.map((p, idx) => (
+                    <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                        <span>{p.title}</span>
+                        <span style={{ color: '#10ac84' }}>✓</span>
+                      </div>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#888' }}>{p.technology} - {p.difficulty}</p>
+                    </div>
+                  ))}
+                </div>
+
                 <button 
                   className="export-btn"
                   onClick={() => {
-                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(user.completedProjects, null, 2));
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(portfolioProjects, null, 2));
                     const downloadAnchor = document.createElement('a');
                     downloadAnchor.setAttribute("href", dataStr);
                     downloadAnchor.setAttribute("download", "codejourney_portfolio.json");
                     document.body.appendChild(downloadAnchor);
                     downloadAnchor.click();
                     downloadAnchor.remove();
-                  }}
-                  style={{
-                    width: '100%',
-                    backgroundImage: 'linear-gradient(135deg, #00d2ff, #af40ff)',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '12px',
-                    color: '#fff',
-                    fontWeight: 'bold',
-                    cursor: 'pointer'
                   }}
                 >
                   Download JSON Portfolio
@@ -229,8 +202,8 @@ const StyledDashboard = styled.div`
   }
 
   .stat-card {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.08)'};
+    background: ${props => props.themeMode === 'dark' ? 'rgba(24, 24, 27, 0.95)' : '#fff'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
     border-radius: 12px;
     padding: 20px 24px;
     display: flex;
@@ -279,10 +252,13 @@ const StyledDashboard = styled.div`
   }
 
   .project-card {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.01)'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.06)'};
+    background: ${props => props.themeMode === 'dark' ? 'rgba(24, 24, 27, 0.95)' : '#fff'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)'};
     border-radius: 12px;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   .tech-badge {
@@ -292,6 +268,23 @@ const StyledDashboard = styled.div`
     border-radius: 4px;
     font-size: 0.75rem;
     font-weight: bold;
+  }
+
+  .resume-btn {
+    width: 100%;
+    background-image: linear-gradient(135deg, #6366f1, #4f46e5);
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-size: 0.85rem;
+  }
+
+  .resume-btn:hover {
+    opacity: 0.9;
   }
 
   .empty-projects-state {
@@ -308,8 +301,19 @@ const StyledDashboard = styled.div`
 
   .empty-projects-state p {
     color: #888;
-    margin: 0;
+    margin: 0 0 20px 0;
     font-size: 0.95rem;
+  }
+
+  .browse-btn {
+    background-image: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.85rem;
   }
 
   .gamification-sidebar {
@@ -319,8 +323,8 @@ const StyledDashboard = styled.div`
   }
 
   .sidebar-card {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.08)'};
+    background: ${props => props.themeMode === 'dark' ? 'rgba(24, 24, 27, 0.95)' : '#fff'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
     border-radius: 16px;
     padding: 25px;
   }
@@ -347,16 +351,34 @@ const StyledDashboard = styled.div`
     border-radius: 6px;
     font-size: 0.9rem;
     background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.01)' : 'rgba(0, 0, 0, 0.01)'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'};
   }
 
   .leaderboard-item.highlighted {
-    background: rgba(0, 210, 255, 0.1);
-    border: 1.5px solid #00d2ff;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1.5px solid #6366f1;
     font-weight: bold;
   }
 
   .leaderboard-item .xp {
-    color: #00d2ff;
+    color: #6366f1;
+  }
+
+  .export-btn {
+    width: 100%;
+    background-image: linear-gradient(135deg, #6366f1, #4f46e5);
+    border: none;
+    border-radius: 6px;
+    padding: 12px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: opacity 0.15s;
+  }
+
+  .export-btn:hover {
+    opacity: 0.9;
   }
 `;
 

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { PROJECTS_CURRICULUM } from './curriculumData';
 
 export const AppContext = createContext();
 
@@ -7,7 +8,6 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState('dark');
   const [toasts, setToasts] = useState([]);
 
-  // Load user session and theme from localStorage on start
   useEffect(() => {
     const savedUser = localStorage.getItem('user_session');
     if (savedUser) {
@@ -34,7 +34,6 @@ export const AppProvider = ({ children }) => {
   };
 
   const login = (email, password) => {
-    // Normal admin credentials check
     if (email === 'admin@gmail.com' && password === '123') {
       const adminSession = {
         name: 'Administrator',
@@ -44,30 +43,29 @@ export const AppProvider = ({ children }) => {
         level: 99,
         streak: 30,
         enrolledCourses: [],
-        completedProjects: [],
+        completedProjects: ['calculator-ui'],
         progress: {}
       };
       setUser(adminSession);
       localStorage.setItem('user_session', JSON.stringify(adminSession));
-      addToast('Admin logged in successfully!', 'success');
+      addToast('Admin session unlocked successfully!', 'success');
       return { success: true, isAdmin: true };
     }
 
-    // Mock student credentials verification
     const studentSession = {
       name: email.split('@')[0],
       email,
       role: 'student',
       xp: 250,
-      level: 1,
-      streak: 1,
-      enrolledCourses: [],
+      level: 2,
+      streak: 5,
+      enrolledCourses: ['calculator-ui'],
       completedProjects: [],
-      progress: {}
+      progress: { 'calculator-ui': 66 }
     };
     setUser(studentSession);
     localStorage.setItem('user_session', JSON.stringify(studentSession));
-    addToast('Logged in successfully!', 'success');
+    addToast(`Welcome back, ${studentSession.name}!`, 'success');
     return { success: true, isAdmin: false };
   };
 
@@ -78,14 +76,14 @@ export const AppProvider = ({ children }) => {
       role: 'student',
       xp: 0,
       level: 1,
-      streak: 0,
+      streak: 1,
       enrolledCourses: [],
       completedProjects: [],
       progress: {}
     };
     setUser(studentSession);
     localStorage.setItem('user_session', JSON.stringify(studentSession));
-    addToast('Account created successfully!', 'success');
+    addToast('Registered successfully! Let\'s build.', 'success');
     return { success: true };
   };
 
@@ -96,14 +94,29 @@ export const AppProvider = ({ children }) => {
     addToast('Logged out successfully.', 'info');
   };
 
+  // Check if a project is locked based on prerequisite completion status
+  const isProjectLocked = (projectId) => {
+    const targetProject = PROJECTS_CURRICULUM.find(p => p.id === projectId);
+    if (!targetProject || !targetProject.prereqId) {
+      return false; // First project or not found
+    }
+    // Return true (locked) if prereqId is not in completedProjects list
+    return !user?.completedProjects?.includes(targetProject.prereqId);
+  };
+
   const enrollInProject = (projectId) => {
     if (!user) {
-      addToast('Please login to enroll in courses.', 'warning');
+      addToast('Authentication required to enroll in projects.', 'warning');
+      return false;
+    }
+
+    if (isProjectLocked(projectId)) {
+      addToast('Please complete the prerequisite projects first.', 'warning');
       return false;
     }
 
     if (user.enrolledCourses.includes(projectId)) {
-      return true; // Already enrolled
+      return true;
     }
 
     const updatedUser = {
@@ -121,14 +134,20 @@ export const AppProvider = ({ children }) => {
     if (!user) return;
     const updatedProgress = { ...user.progress, [projectId]: progressPercent };
     const updatedCompleted = [...user.completedProjects];
+    let xpGain = 50;
+
     if (progressPercent === 100 && !updatedCompleted.includes(projectId)) {
       updatedCompleted.push(projectId);
+      xpGain += 200; // Extra completion XP
+      addToast(`🎉 Project completed! Unlocked next milestone.`, 'success');
     }
+
     const updatedUser = {
       ...user,
       progress: updatedProgress,
       completedProjects: updatedCompleted,
-      xp: user.xp + (progressPercent === 100 ? 250 : 50)
+      xp: user.xp + xpGain,
+      level: Math.floor((user.xp + xpGain) / 500) + 1
     };
     setUser(updatedUser);
     localStorage.setItem('user_session', JSON.stringify(updatedUser));
@@ -144,6 +163,7 @@ export const AppProvider = ({ children }) => {
       login,
       signup,
       logout,
+      isProjectLocked,
       enrollInProject,
       updateProjectProgress
     }}>
