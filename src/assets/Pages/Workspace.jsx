@@ -172,6 +172,31 @@ const Workspace = () => {
             <h3>{project?.title}</h3>
             <p className="goal-desc">{project?.objective}</p>
 
+            {project?.fccReference && (
+              <a 
+                href={project.fccReference} 
+                target="_blank" 
+                rel="noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(99, 102, 241, 0.1)',
+                  border: '1px solid rgba(99, 102, 241, 0.3)',
+                  color: '#6366f1',
+                  textDecoration: 'none',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  marginTop: '5px',
+                  marginBottom: '15px'
+                }}
+              >
+                📖 freeCodeCamp Reference Guide
+              </a>
+            )}
+
             <div className="checklist-box">
               <h4>Requirements Checklist</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>

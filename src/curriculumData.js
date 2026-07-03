@@ -2,166 +2,167 @@
 
 export const PROJECTS_CURRICULUM = [
   {
-    id: 'calculator-ui',
-    title: 'JavaScript Calculator UI',
-    course: 'Frontend Development',
-    technology: 'JavaScript',
+    id: 'fcc-rwd-portfolio',
+    course: 'Responsive Web Design',
+    title: 'Personal Portfolio Page',
     difficulty: 'Beginner',
     estTime: '3-4 hours',
-    icon: '⚡',
-    prereqId: null, // First project is unlocked
-    objective: 'Create a fully functional mathematical calculator with support for keyboard entry, fluid animations, and overflow boundaries.',
+    icon: '🌐',
+    prereqId: null,
+    fccReference: 'https://www.freecodecamp.org/learn/responsive-web-design/',
+    objective: 'Build a fully responsive developer portfolio showcase containing bio links, feature galleries, contact forms, and custom flex designs.',
     requirements: [
-      { id: 'req1', text: 'Implement key event listeners for digit pads' },
-      { id: 'req2', text: 'Construct safe parsing evaluation of equations' },
-      { id: 'req3', text: 'Establish keyboard keys binding handlers' },
-      { id: 'req4', text: 'Configure warning state on division by zero' }
+      { id: 'rwd1', text: 'Define a profile landing viewport with nav bars' },
+      { id: 'rwd2', text: 'Construct a responsive project grid with absolute tags' },
+      { id: 'rwd3', text: 'Add media queries to restructure cards on mobile screens' }
     ],
     starterCode: {
       'index.html': `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Calculator Project</title>
+  <title>FCC Responsive Portfolio</title>
   <style>
-    body { background: #09090b; color: #fff; font-family: system-ui; display: flex; justify-content: center; align-items: center; min-height: 80vh; margin: 0; }
-    .calc { background: #18181b; border: 1px solid #27272a; padding: 20px; border-radius: 12px; width: 280px; }
-    .display { background: #09090b; padding: 15px; border-radius: 6px; text-align: right; font-size: 1.5rem; margin-bottom: 15px; border: 1px solid #27272a; min-height: 35px; }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    button { background: #27272a; border: 1px solid #3f3f46; color: #fff; padding: 15px; font-size: 1.1rem; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
-    button:hover { background: #3f3f46; border-color: #6366f1; }
-    button.op { background: #6366f1; border-color: #4f46e5; }
-    button.op:hover { background: #4f46e5; }
+    body { background: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 40px 0; }
+    .card { background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #475569; }
   </style>
 </head>
 <body>
-  <div className="calc">
-    <div className="display" id="screen">0</div>
-    <div className="grid">
-      <button onclick="press('7')">7</button>
-      <button onclick="press('8')">8</button>
-      <button onclick="press('9')">9</button>
-      <button onclick="press('/')" className="op">/</button>
-      <button onclick="press('4')">4</button>
-      <button onclick="press('5')">5</button>
-      <button onclick="press('6')">6</button>
-      <button onclick="press('*')" className="op">*</button>
-      <button onclick="press('1')">1</button>
-      <button onclick="press('2')">2</button>
-      <button onclick="press('3')">3</button>
-      <button onclick="press('-')" className="op">-</button>
-      <button onclick="press('0')">0</button>
-      <button onclick="clearDisplay()">C</button>
-      <button onclick="calculate()" className="op">=</button>
-      <button onclick="press('+')" className="op">+</button>
-    </div>
+  <header>
+    <h2>Developer Portfolio</h2>
+    <nav>
+      <a href="#projects" style="color: #38bdf8;">Projects</a>
+    </nav>
+  </header>
+  <div className="grid" id="projects">
+    <div className="card"><h3>Project 1</h3><p>FCC Landing Page.</p></div>
   </div>
 </body>
 </html>`,
-      'styles.css': `/* Custom overrides for the Calculator */`,
-      'script.js': `// Input state tracker
-let expression = '';
-
-function press(val) {
-  expression += val;
-  document.getElementById('screen').innerText = expression;
-}
-
-function clearDisplay() {
-  expression = '';
-  document.getElementById('screen').innerText = '0';
-}
-
-function calculate() {
-  try {
-    const result = eval(expression);
-    document.getElementById('screen').innerText = result;
-    expression = result.toString();
-  } catch (err) {
-    document.getElementById('screen').innerText = 'Error';
-    expression = '';
-  }
-}`
+      'styles.css': `/* CSS Custom Overrides */`,
+      'script.js': `console.log("Portfolio online.");`
     }
   },
   {
-    id: 'supabase-landing',
-    title: 'Supabase SaaS Landing Page',
-    course: 'Frontend Development',
-    technology: 'React',
+    id: 'fcc-js-calculator',
+    course: 'JavaScript Algorithms and Data Structures',
+    title: 'JavaScript Calculator',
     difficulty: 'Intermediate',
     estTime: '6-8 hours',
     icon: '⚡',
-    prereqId: 'calculator-ui', // Locked until calculator is complete
-    objective: 'Build an ultra-modern, interactive marketing landing page with glassmorphic cards, testimonial grids, and dark-theme configurations.',
+    prereqId: 'fcc-rwd-portfolio',
+    fccReference: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/',
+    objective: 'Create a math expression evaluator displaying calculations, supporting clear resets, and validation limits.',
     requirements: [
-      { id: 'req1', text: 'Create responsive navbar with hamburger controls' },
-      { id: 'req2', text: 'Design glassmorphic feature panels using CSS filters' },
-      { id: 'req3', text: 'Implement pricing tier cards with switchable billing cycles' },
-      { id: 'req4', text: 'Configure email newsletter form verification logic' }
+      { id: 'js1', text: 'Create event listeners binding buttons to values' },
+      { id: 'js2', text: 'Process calculation evaluation safely in script.js' },
+      { id: 'js3', text: 'Add decimal limits check logic' }
     ],
     starterCode: {
       'index.html': `<!DOCTYPE html>
 <html>
 <head>
-  <title>Supabase SaaS</title>
   <style>
-    body { background: #0f0f12; color: #fff; font-family: sans-serif; margin: 0; }
-    .hero { text-align: center; padding: 80px 20px; }
-    .features { display: flex; justify-content: center; gap: 20px; padding: 40px; }
-    .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 25px; width: 280px; }
+    body { background: #09090b; color: #fff; text-align: center; font-family: monospace; }
   </style>
 </head>
 <body>
-  <div className="hero">
-    <h1>Database for Modern SaaS</h1>
-    <p>Scale without configuration bottlenecks.</p>
-  </div>
-  <div className="features">
-    <div className="card"><h3>⚡ Realtime</h3><p>Sync database keys live.</p></div>
-    <div className="card"><h3>🛡️ Auth</h3><p>JWT verification out of the box.</p></div>
-  </div>
+  <h2>JS Calculator</h2>
+  <div id="display">0</div>
 </body>
 </html>`,
-      'styles.css': `/* SaaS styling directives */`,
-      'script.js': `console.log("SaaS Page Script Loaded.");`
+      'styles.css': ``,
+      'script.js': `console.log("Calculator loaded.");`
     }
   },
   {
-    id: 'ai-prompt-studio',
-    title: 'AI Prompt Studio Interface',
-    course: 'AI & Data Integration',
-    technology: 'FastAPI',
-    difficulty: 'Advanced',
-    estTime: '12-15 hours',
-    icon: '🤖',
-    prereqId: 'supabase-landing', // Locked until landing page is complete
-    objective: 'Design an AI Prompt compiler where developers can run prompt templates, save presets, and inspect latency outputs.',
+    id: 'fcc-react-quotes',
+    course: 'Front End Development Libraries (React)',
+    title: 'Random Quote Machine',
+    difficulty: 'Intermediate',
+    estTime: '5-6 hours',
+    icon: '⚛️',
+    prereqId: 'fcc-js-calculator',
+    fccReference: 'https://www.freecodecamp.org/learn/front-end-development-libraries/',
+    objective: 'Build quote generators pulling quotes from arrays, rendering animations, and providing Twitter sharing tools.',
     requirements: [
-      { id: 'req1', text: 'Build three-column prompt testing panels' },
-      { id: 'req2', text: 'Integrate prompt latency metric badges' },
-      { id: 'req3', text: 'Implement API key storage in localized memory' },
-      { id: 'req4', text: 'Configure parameter slider controls (temperature, top-p)' }
+      { id: 'react1', text: 'Render a quote box containing random quotes text' },
+      { id: 'react2', text: 'Implement a new-quote trigger button' }
     ],
     starterCode: {
       'index.html': `<!DOCTYPE html>
 <html>
-<head>
-  <title>AI Prompt Studio</title>
-  <style>
-    body { background: #09090b; color: #fff; font-family: system-ui; padding: 30px; }
-    .studio-container { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
-  </style>
-</head>
 <body>
-  <div className="studio-container">
-    <div><h3>Controls</h3></div>
-    <div><h3>Prompt Workspace</h3></div>
+  <div id="quote-box">
+    <p id="text">Quotes loading...</p>
+    <button id="new-quote">New Quote</button>
   </div>
 </body>
 </html>`,
-      'styles.css': `/* AI controls override definitions */`,
-      'script.js': `console.log("Prompt studio ready.");`
+      'styles.css': ``,
+      'script.js': `console.log("Quotes active.");`
+    }
+  },
+  {
+    id: 'fcc-backend-timestamp',
+    course: 'Backend Development and APIs (Node/Express)',
+    title: 'Timestamp Microservice API',
+    difficulty: 'Advanced',
+    estTime: '8-10 hours',
+    icon: '⚙️',
+    prereqId: 'fcc-react-quotes',
+    fccReference: 'https://www.freecodecamp.org/learn/back-end-development-and-apis/',
+    objective: 'Deploy a server microservice parsing dates into unix and UTC formats returning JSON strings.',
+    requirements: [
+      { id: 'api1', text: 'Accept dates parameters in API routing paths' },
+      { id: 'api2', text: 'Format timestamps returning Unix integer values' }
+    ],
+    starterCode: {
+      'index.html': `<h2>Timestamp API</h2><p>Call /api/:date</p>`,
+      'styles.css': ``,
+      'script.js': `console.log("API active.");`
+    }
+  },
+  {
+    id: 'fcc-db-celestial',
+    course: 'Relational Database / SQL',
+    title: 'Celestial Database Schema',
+    difficulty: 'Advanced',
+    estTime: '10-12 hours',
+    icon: '🐬',
+    prereqId: 'fcc-backend-timestamp',
+    fccReference: 'https://www.freecodecamp.org/learn/relational-database/',
+    objective: 'Design a celestial relational map containing stars, planets, and moons utilizing SQL tables.',
+    requirements: [
+      { id: 'sql1', text: 'Design Primary Keys mapping structures' },
+      { id: 'sql2', text: 'Define foreign key configurations' }
+    ],
+    starterCode: {
+      'index.html': `<h2>Relational Schema</h2>`,
+      'styles.css': ``,
+      'script.js': `console.log("SQL Schema setup.");`
+    }
+  },
+  {
+    id: 'fcc-python-arithmetic',
+    course: 'Python / Scientific Computing',
+    title: 'Arithmetic Formatter',
+    difficulty: 'Advanced',
+    estTime: '6-8 hours',
+    icon: '🐍',
+    prereqId: 'fcc-db-celestial',
+    fccReference: 'https://www.freecodecamp.org/learn/scientific-computing-with-python/',
+    objective: 'Implement terminal formatters arranging math operations vertically in lines.',
+    requirements: [
+      { id: 'py1', text: 'Construct string formatter layouts' },
+      { id: 'py2', text: 'Add limits check checks for operations count' }
+    ],
+    starterCode: {
+      'index.html': `<h2>Formatter Studio</h2>`,
+      'styles.css': ``,
+      'script.js': `console.log("Python formatter ready.");`
     }
   }
 ];

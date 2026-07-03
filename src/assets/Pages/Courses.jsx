@@ -132,7 +132,15 @@ function Courses() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                   <span style={{ fontSize: '2rem' }}>{proj.icon}</span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{
+                      background: 'rgba(99, 102, 241, 0.1)',
+                      color: '#6366f1',
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold'
+                    }}>{proj.course}</span>
                     <span style={{
                       background: 'rgba(0, 210, 255, 0.1)',
                       color: '#00d2ff',
