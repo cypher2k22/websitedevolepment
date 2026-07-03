@@ -1,168 +1,232 @@
 // src/curriculumData.js
 
 export const PROJECTS_CURRICULUM = [
+  // HTML Course
   {
-    id: 'fcc-rwd-portfolio',
-    course: 'Responsive Web Design',
-    title: 'Personal Portfolio Page',
+    id: 'html-calculator',
+    course: 'HTML',
+    title: 'Calculator UI Layout',
     difficulty: 'Beginner',
-    estTime: '3-4 hours',
+    estTime: '2 hours',
     icon: '🌐',
     prereqId: null,
-    fccReference: 'https://www.freecodecamp.org/learn/responsive-web-design/',
-    objective: 'Build a fully responsive developer portfolio showcase containing bio links, feature galleries, contact forms, and custom flex designs.',
+    objective: 'Build the semantic HTML structure of a pocket calculator with grid areas and accessible input tags.',
     requirements: [
-      { id: 'rwd1', text: 'Define a profile landing viewport with nav bars' },
-      { id: 'rwd2', text: 'Construct a responsive project grid with absolute tags' },
-      { id: 'rwd3', text: 'Add media queries to restructure cards on mobile screens' }
+      { id: 'h1', text: 'Use semantic structure tags' },
+      { id: 'h2', text: 'Implement key pads buttons' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Layout Setup', desc: 'Initialize semantic HTML structure and buttons grid.' }
     ],
     starterCode: {
-      'index.html': `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>FCC Responsive Portfolio</title>
-  <style>
-    body { background: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
-    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 40px 0; }
-    .card { background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #475569; }
-  </style>
-</head>
-<body>
-  <header>
-    <h2>Developer Portfolio</h2>
-    <nav>
-      <a href="#projects" style="color: #38bdf8;">Projects</a>
-    </nav>
-  </header>
-  <div className="grid" id="projects">
-    <div className="card"><h3>Project 1</h3><p>FCC Landing Page.</p></div>
-  </div>
-</body>
-</html>`,
-      'styles.css': `/* CSS Custom Overrides */`,
-      'script.js': `console.log("Portfolio online.");`
+      'index.html': '<h2>Calculator Layout</h2>',
+      'styles.css': '',
+      'script.js': ''
     }
   },
   {
-    id: 'fcc-js-calculator',
-    course: 'JavaScript Algorithms and Data Structures',
-    title: 'JavaScript Calculator',
+    id: 'html-portfolio',
+    course: 'HTML',
+    title: 'Personal Portfolio Page',
+    difficulty: 'Beginner',
+    estTime: '3 hours',
+    icon: '🌐',
+    prereqId: 'html-calculator',
+    objective: 'Create a developer portfolio landing page with links to bio details.',
+    requirements: [
+      { id: 'h3', text: 'Map navigation anchor links' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Setup Portfolio', desc: 'Create bio sections and project list tags.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>My Portfolio</h2>',
+      'styles.css': '',
+      'script.js': ''
+    }
+  },
+
+  // CSS Course
+  {
+    id: 'css-styling',
+    course: 'CSS',
+    title: 'Card Grid Styling',
+    difficulty: 'Beginner',
+    estTime: '3 hours',
+    icon: '🎨',
+    prereqId: null,
+    objective: 'Create glowing glassmorphic panels and fluid flex boxes.',
+    requirements: [
+      { id: 'c1', text: 'Add custom border-radius properties' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Interactive Grids', desc: 'Build flex alignment and border shadows.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>Visual Cards</h2>',
+      'styles.css': '',
+      'script.js': ''
+    }
+  },
+
+  // JavaScript Course
+  {
+    id: 'js-todo',
+    course: 'JavaScript',
+    title: 'Interactive Todo App',
     difficulty: 'Intermediate',
-    estTime: '6-8 hours',
+    estTime: '4 hours',
     icon: '⚡',
-    prereqId: 'fcc-rwd-portfolio',
-    fccReference: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/',
-    objective: 'Create a math expression evaluator displaying calculations, supporting clear resets, and validation limits.',
+    prereqId: null,
+    objective: 'Build list items filters and persistent browser local storage.',
     requirements: [
-      { id: 'js1', text: 'Create event listeners binding buttons to values' },
-      { id: 'js2', text: 'Process calculation evaluation safely in script.js' },
-      { id: 'js3', text: 'Add decimal limits check logic' }
+      { id: 'j1', text: 'Add event listener registers' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'State tracking', desc: 'Map dynamic array list rendering.' }
     ],
     starterCode: {
-      'index.html': `<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { background: #09090b; color: #fff; text-align: center; font-family: monospace; }
-  </style>
-</head>
-<body>
-  <h2>JS Calculator</h2>
-  <div id="display">0</div>
-</body>
-</html>`,
-      'styles.css': ``,
-      'script.js': `console.log("Calculator loaded.");`
+      'index.html': '<h2>Todo List</h2>',
+      'styles.css': '',
+      'script.js': ''
     }
   },
+
+  // React Course
   {
-    id: 'fcc-react-quotes',
-    course: 'Front End Development Libraries (React)',
-    title: 'Random Quote Machine',
+    id: 'react-dashboard',
+    course: 'React',
+    title: 'SaaS Metrics Dashboard',
     difficulty: 'Intermediate',
-    estTime: '5-6 hours',
+    estTime: '6 hours',
     icon: '⚛️',
-    prereqId: 'fcc-js-calculator',
-    fccReference: 'https://www.freecodecamp.org/learn/front-end-development-libraries/',
-    objective: 'Build quote generators pulling quotes from arrays, rendering animations, and providing Twitter sharing tools.',
+    prereqId: null,
+    objective: 'Create user metrics boards with hooks and state managers.',
     requirements: [
-      { id: 'react1', text: 'Render a quote box containing random quotes text' },
-      { id: 'react2', text: 'Implement a new-quote trigger button' }
+      { id: 'r1', text: 'Implement context state mappings' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'State Hooks', desc: 'Map progress stats.' }
     ],
     starterCode: {
-      'index.html': `<!DOCTYPE html>
-<html>
-<body>
-  <div id="quote-box">
-    <p id="text">Quotes loading...</p>
-    <button id="new-quote">New Quote</button>
-  </div>
-</body>
-</html>`,
-      'styles.css': ``,
-      'script.js': `console.log("Quotes active.");`
+      'index.html': '<h2>Metrics Board</h2>',
+      'styles.css': '',
+      'script.js': ''
     }
   },
+
+  // Node.js Course
   {
-    id: 'fcc-backend-timestamp',
-    course: 'Backend Development and APIs (Node/Express)',
-    title: 'Timestamp Microservice API',
+    id: 'node-api',
+    course: 'Node.js',
+    title: 'REST API Microservice',
     difficulty: 'Advanced',
-    estTime: '8-10 hours',
-    icon: '⚙️',
-    prereqId: 'fcc-react-quotes',
-    fccReference: 'https://www.freecodecamp.org/learn/back-end-development-and-apis/',
-    objective: 'Deploy a server microservice parsing dates into unix and UTC formats returning JSON strings.',
+    estTime: '8 hours',
+    icon: '🟢',
+    prereqId: null,
+    objective: 'Configure Express endpoints routing requests to databases.',
     requirements: [
-      { id: 'api1', text: 'Accept dates parameters in API routing paths' },
-      { id: 'api2', text: 'Format timestamps returning Unix integer values' }
+      { id: 'n1', text: 'Implement route endpoint handlers' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'API Setup', desc: 'Connect Express server controllers.' }
     ],
     starterCode: {
-      'index.html': `<h2>Timestamp API</h2><p>Call /api/:date</p>`,
-      'styles.css': ``,
-      'script.js': `console.log("API active.");`
+      'index.html': '<h2>Express Server</h2>',
+      'styles.css': '',
+      'script.js': ''
     }
   },
+
+  // MongoDB Course
   {
-    id: 'fcc-db-celestial',
-    course: 'Relational Database / SQL',
-    title: 'Celestial Database Schema',
+    id: 'mongo-crud',
+    course: 'MongoDB',
+    title: 'Document Storage DB',
     difficulty: 'Advanced',
-    estTime: '10-12 hours',
+    estTime: '8 hours',
+    icon: '🍃',
+    prereqId: null,
+    objective: 'Define Mongoose schemas and run filters operations.',
+    requirements: [
+      { id: 'm1', text: 'Write database models' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Mongoose Connect', desc: 'Perform aggregation checks.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>Database Console</h2>',
+      'styles.css': '',
+      'script.js': ''
+    }
+  },
+
+  // MySQL Course
+  {
+    id: 'mysql-relational',
+    course: 'MySQL',
+    title: 'Relational Schema Design',
+    difficulty: 'Advanced',
+    estTime: '10 hours',
     icon: '🐬',
-    prereqId: 'fcc-backend-timestamp',
-    fccReference: 'https://www.freecodecamp.org/learn/relational-database/',
-    objective: 'Design a celestial relational map containing stars, planets, and moons utilizing SQL tables.',
+    prereqId: null,
+    objective: 'Write relational tables, foreign key bindings, and joins.',
     requirements: [
-      { id: 'sql1', text: 'Design Primary Keys mapping structures' },
-      { id: 'sql2', text: 'Define foreign key configurations' }
+      { id: 'q1', text: 'Configure database tables' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'SQL Queries', desc: 'Execute select parameters joins.' }
     ],
     starterCode: {
-      'index.html': `<h2>Relational Schema</h2>`,
-      'styles.css': ``,
-      'script.js': `console.log("SQL Schema setup.");`
+      'index.html': '<h2>SQL CLI Terminal</h2>',
+      'styles.css': '',
+      'script.js': ''
     }
   },
+
+  // FastAPI Course
   {
-    id: 'fcc-python-arithmetic',
-    course: 'Python / Scientific Computing',
-    title: 'Arithmetic Formatter',
+    id: 'fastapi-backend',
+    course: 'FastAPI',
+    title: 'Asynchronous API Studio',
     difficulty: 'Advanced',
-    estTime: '6-8 hours',
-    icon: '🐍',
-    prereqId: 'fcc-db-celestial',
-    fccReference: 'https://www.freecodecamp.org/learn/scientific-computing-with-python/',
-    objective: 'Implement terminal formatters arranging math operations vertically in lines.',
+    estTime: '10 hours',
+    icon: '🚀',
+    prereqId: null,
+    objective: 'Deploy async Python endpoints and auto-generate Swagger.',
     requirements: [
-      { id: 'py1', text: 'Construct string formatter layouts' },
-      { id: 'py2', text: 'Add limits check checks for operations count' }
+      { id: 'f1', text: 'Build FastAPI routes parameters' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Swagger docs', desc: 'Confirm status returns code.' }
     ],
     starterCode: {
-      'index.html': `<h2>Formatter Studio</h2>`,
-      'styles.css': ``,
-      'script.js': `console.log("Python formatter ready.");`
+      'index.html': '<h2>FastAPI Server</h2>',
+      'styles.css': '',
+      'script.js': ''
+    }
+  },
+
+  // React Native Course
+  {
+    id: 'native-mobile',
+    course: 'React Native',
+    title: 'Mobile Task Manager',
+    difficulty: 'Advanced',
+    estTime: '12 hours',
+    icon: '📱',
+    prereqId: null,
+    objective: 'Build native iOS/Android lists views with touch handlers.',
+    requirements: [
+      { id: 'rn1', text: 'Define scroll list layout' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Touch Handlers', desc: 'Bind buttons events on mobile.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>RN Screen</h2>',
+      'styles.css': '',
+      'script.js': ''
     }
   }
 ];
