@@ -1,126 +1,220 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
+import { AppContext } from '../../AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminPanel = () => {
-  const [courses, setCourses] = useState([
-    { id: 1, title: 'HTML Boilerplates', lessons: 5, status: 'Published' },
-    { id: 2, title: 'CSS Grid layouts', lessons: 8, status: 'Draft' }
-  ]);
+  const { user, login, theme, addToast } = useContext(AppContext);
+  const navigate = useNavigate();
+  
+  // Login credentials states
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const [newTitle, setNewTitle] = useState('');
-  const [aiSystemPrompt, setAiSystemPrompt] = useState(
-    'You are an expert fullstack mentor. Give hints. Never reveal code answers directly.'
-  );
+  // Mock student directory list
+  const mockStudents = [
+    { id: 1, name: 'Alice Dev', email: 'alice@gmail.com', enrolled: ['html-p1', 'css-p1'], completed: ['html-p1'], xp: 5400 },
+    { id: 2, name: 'Bob Stack', email: 'bob@gmail.com', enrolled: ['html-p1'], completed: [], xp: 4800 }
+  ];
 
-  const handleCreateCourse = (e) => {
+  const handleAdminSignIn = (e) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
-    setCourses([...courses, { id: courses.length + 1, title: newTitle, lessons: 0, status: 'Draft' }]);
-    setNewTitle('');
+    const result = login(email, password);
+    if (result.success && result.isAdmin) {
+      addToast('Admin dashboard unlocked.', 'success');
+    } else {
+      addToast('Invalid admin credentials. Access Denied.', 'warning');
+    }
   };
 
+  const isAdminAuthenticated = user && user.role === 'admin';
+
+  if (!isAdminAuthenticated) {
+    return (
+      <StyledAuth themeMode={theme}>
+        <div className="auth-card">
+          <h2>Instructor Admin Login</h2>
+          <p>Please enter your instructor credentials to view system analytics.</p>
+          <form onSubmit={handleAdminSignIn}>
+            <div className="form-group">
+              <label>Admin Email</label>
+              <input 
+                type="email" 
+                required 
+                placeholder="admin@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="form-group" style={{ marginTop: '15px' }}>
+              <label>Password</label>
+              <input 
+                type="password" 
+                required 
+                placeholder="•••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <button type="submit" className="login-btn">Unlock Console</button>
+          </form>
+        </div>
+      </StyledAuth>
+    );
+  }
+
   return (
-    <StyledAdmin>
-      <h1 className="admin-title">Instructor Console & Management</h1>
-      
+    <StyledDashboard themeMode={theme}>
+      <h1 className="admin-title">Instructor Console</h1>
+
       <div className="admin-grid">
-        {/* Left Column: Analytics and Course Editor */}
-        <div className="left-panel">
+        {/* Left: Progress lists */}
+        <div className="left-pane">
           
-          {/* Analytics Card */}
+          {/* Statistics */}
           <div className="admin-card">
-            <h3>Analytics Overview</h3>
+            <h3>System Statistics</h3>
             <div className="stats-row">
               <div className="stat-item">
-                <span className="value">1,420</span>
-                <span className="label">Enrolled Students</span>
+                <span className="value">{mockStudents.length}</span>
+                <span className="label">Registered Students</span>
               </div>
               <div className="stat-item">
-                <span className="value">345</span>
-                <span className="label">Certificates Issued</span>
+                <span className="value">1</span>
+                <span className="label">Certificates Claimed</span>
               </div>
               <div className="stat-item">
-                <span className="value">98.4%</span>
-                <span className="label">Completion Rate</span>
+                <span className="value">3</span>
+                <span className="label">Curriculum Projects</span>
               </div>
             </div>
           </div>
 
-          {/* Curriculum Builder Form */}
+          {/* Student list */}
           <div className="admin-card">
-            <h3>Create New Course Pathway</h3>
-            <form onSubmit={handleCreateCourse} className="create-form">
-              <div className="form-group">
-                <label>Course Title</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. Advanced Docker Orchestrations"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                />
-              </div>
-              <button type="submit" className="admin-btn">Add Course</button>
-            </form>
-
-            <h4 style={{ marginTop: '20px', marginBottom: '10px' }}>Active Courses</h4>
-            <div className="courses-table">
-              {courses.map(c => (
-                <div key={c.id} className="course-row">
-                  <span>{c.title}</span>
-                  <span className="badge">{c.lessons} Lessons</span>
-                  <span className={`status ${c.status.toLowerCase()}`}>{c.status}</span>
+            <h3>Registered Student Directory</h3>
+            <div className="student-list">
+              {mockStudents.map(student => (
+                <div key={student.id} className="student-row">
+                  <div>
+                    <strong>{student.name}</strong>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#888' }}>{student.email}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span className="xp-label">{student.xp} XP</span>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#aaa' }}>
+                      Enrolled: {student.enrolled.length} | Completed: {student.completed.length}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Right Column: AI prompt management */}
-        <div className="right-panel">
+        {/* Right: AI configuration details */}
+        <div className="right-pane">
           <div className="admin-card">
-            <h3>AI Mentor Prompt Configuration</h3>
-            <p style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '15px' }}>
-              Configure the default System Instructions that influence how the AI chatbot interacts with students in the Workspace panel.
+            <h3>System Settings</h3>
+            <p style={{ fontSize: '0.85rem', color: '#aaa', lineHeight: '1.4', marginBottom: '15px' }}>
+              You are logged in with authority credentials. From this console you can manage mock student progress records and project pathways.
             </p>
-            <div className="form-group">
-              <label>System Prompt Instruction</label>
-              <textarea 
-                value={aiSystemPrompt}
-                onChange={(e) => setAiSystemPrompt(e.target.value)}
-                style={{
-                  height: '140px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '4px',
-                  padding: '12px',
-                  color: 'white',
-                  outline: 'none',
-                  fontSize: '0.9rem',
-                  resize: 'none',
-                  fontFamily: 'monospace'
-                }}
-              />
-            </div>
             <button 
               className="admin-btn"
-              onClick={() => alert('AI System Instructions updated successfully!')}
-              style={{ marginTop: '15px' }}
+              onClick={() => { addToast('Seeded databases updated successfully.', 'success'); }}
+              style={{ width: '100%', marginBottom: '10px' }}
             >
-              Update AI Mentor Prompt
+              Force Seed Curriculum
+            </button>
+            <button 
+              className="admin-btn secondary"
+              onClick={() => navigate('/dashboard')}
+              style={{ width: '100%' }}
+            >
+              Go to Student Dashboard
             </button>
           </div>
         </div>
       </div>
-    </StyledAdmin>
+    </StyledDashboard>
   );
 };
 
-const StyledAdmin = styled.div`
+const StyledAuth = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  background: ${props => props.themeMode === 'dark' ? '#09090c' : '#f9f9fb'};
+  color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
+
+  .auth-card {
+    width: 360px;
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255,255,255,0.03)' : '#fff'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .auth-card h2 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  .auth-card p {
+    font-size: 0.85rem;
+    color: #888;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+  }
+
+  .form-group label {
+    font-weight: 600;
+  }
+
+  .form-group input {
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255,255,255,0.05)' : '#fff'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.15)'};
+    color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
+    padding: 10px;
+    border-radius: 4px;
+    outline: none;
+  }
+
+  .login-btn {
+    width: 100%;
+    margin-top: 20px;
+    background-image: linear-gradient(135deg, #00d2ff, #af40ff);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    position: static;
+    transform: none;
+    height: auto;
+    min-width: auto;
+    box-shadow: none;
+  }
+`;
+
+const StyledDashboard = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-  color: #fff;
+  color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
   font-family: system-ui, sans-serif;
+  min-height: 80vh;
 
   .admin-title {
     font-size: 2.2rem;
@@ -133,7 +227,7 @@ const StyledAdmin = styled.div`
 
   .admin-grid {
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 1fr 340px;
     gap: 30px;
   }
 
@@ -144,18 +238,17 @@ const StyledAdmin = styled.div`
   }
 
   .admin-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.02)'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.08)'};
     border-radius: 12px;
     padding: 25px;
     margin-bottom: 30px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
 
   .admin-card h3 {
     margin-top: 0;
     font-size: 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,0.08)'};
     padding-bottom: 12px;
     margin-bottom: 20px;
   }
@@ -167,8 +260,8 @@ const StyledAdmin = styled.div`
   }
 
   .stat-item {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.01)' : 'rgba(0,0,0,0.01)'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0,0,0,0.05)'};
     border-radius: 8px;
     padding: 15px;
     text-align: center;
@@ -187,81 +280,47 @@ const StyledAdmin = styled.div`
     color: #aaa;
   }
 
-  /* Form & Table */
-  .create-form {
+  .student-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
   }
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .form-group label {
-    font-size: 0.85rem;
-    color: #aaa;
-  }
-
-  .form-group input {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 10px;
-    color: white;
-    outline: none;
-    font-size: 0.95rem;
-  }
-
-  .admin-btn {
-    background-image: linear-gradient(135deg, #00d2ff, #00ddeb);
-    color: #000;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    font-weight: bold;
-    cursor: pointer;
-    width: fit-content;
-    height: auto;
-    position: static;
-    transform: none;
-    box-shadow: none;
-  }
-
-  .courses-table {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .course-row {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  .student-row {
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.01)' : '#fff'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0,0,0,0.08)'};
     border-radius: 6px;
     padding: 12px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.9rem;
   }
 
-  .badge {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-  }
-
-  .status {
-    font-size: 0.75rem;
+  .xp-label {
     font-weight: bold;
-    text-transform: uppercase;
+    color: #00d2ff;
   }
 
-  .status.published { color: #10ac84; }
-  .status.draft { color: #ff9f43; }
+  .admin-btn {
+    background-image: linear-gradient(135deg, #00d2ff, #af40ff);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    position: static;
+    transform: none;
+    height: auto;
+    min-width: auto;
+    box-shadow: none;
+  }
+
+  .admin-btn.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
+  }
 `;
 
 export default AdminPanel;

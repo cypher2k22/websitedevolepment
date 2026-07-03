@@ -1,6 +1,7 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AppProvider } from './AppContext';
 import Home from "./assets/Pages/Home";
 import Courses from "./assets/Pages/Courses";
 import Login from "./assets/Pages/Login";
@@ -11,27 +12,31 @@ import AdminPanel from "./assets/Pages/AdminPanel";
 import Radio from "./assets/components/Radio";
 import Header from "./assets/components/Header";
 import Footer from "./assets/components/Footer";
+import ToastContainer from "./assets/components/ToastContainer";
 import "./index.css";
 import "./App.css";
 
 function App() {
   return (
-    <Router>
-      <div className="bg">
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/donate" element={<Donate />} />
-          <Route path="/Radio" element={<Radio/>}/>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/workspace/:tech/:projectId/:milestoneId" element={<Workspace />} />
-          <Route path="/admin" element={<AdminPanel />} />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+    <AppProvider>
+      <Router>
+        <div className="bg">
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/donate" element={<Donate />} />
+            <Route path="/Radio" element={<Radio/>}/>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/workspace/:tech/:projectId/:milestoneId" element={<Workspace />} />
+            <Route path="/admin" element={<AdminPanel />} />
+          </Routes>
+          <Footer />
+          <ToastContainer />
+        </div>
+      </Router>
+    </AppProvider>
   );
 }
 

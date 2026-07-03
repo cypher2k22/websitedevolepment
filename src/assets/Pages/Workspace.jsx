@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AppContext } from '../../AppContext';
 import { LEARNING_PATHS } from '../../curriculumData';
 
 const Workspace = () => {
   const { tech, projectId, milestoneId } = useParams();
   const navigate = useNavigate();
+  const { user, theme, updateProjectProgress, addToast } = useContext(AppContext);
 
-  // Find curriculum details
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!user) {
+      addToast('Please login to access the workspace.', 'info');
+      navigate('/login');
+    }
+  }, [user, navigate, addToast]);
+
   const currentTech = LEARNING_PATHS[tech] || LEARNING_PATHS.HTML;
   const allProjects = [...(currentTech.levels.Beginner || []), ...(currentTech.levels.Intermediate || []), ...(currentTech.levels.Advanced || [])];
   const project = allProjects.find(p => p.id === projectId) || allProjects[0];
   const milestoneIndex = project?.milestones.findIndex(m => m.id === milestoneId) ?? 0;
-  const milestone = project?.milestones[milestoneIndex] || { title: 'Introductory Milestone', desc: 'Environment Configuration' };
+  const milestone = project?.milestones[milestoneIndex] || { title: 'Workspace Milestone', desc: 'Active lesson environment.' };
 
   // File system state
   const [files, setFiles] = useState({
@@ -26,7 +35,7 @@ const Workspace = () => {
   </style>
 </head>
 <body>
-  <h1>Hello Fullstack</h1>
+  <h1>Hello CodeJourney</h1>
   <p>Modify index.html or styles.css to see live rendering updates!</p>
 </body>
 </html>`,
@@ -40,25 +49,24 @@ console.log("Workspace initialized successfully!");`
 
   const [activeFile, setActiveFile] = useState('index.html');
   const [codeValue, setCodeValue] = useState(files['index.html']);
-  const [consoleLogs, setConsoleLogs] = useState(['System container online.', 'Ready to execute.']);
+  const [consoleLogs, setConsoleLogs] = useState(['System containers started.', 'Workspace online.']);
   const [previewSrc, setPreviewSrc] = useState('');
   const [aiInput, setAiInput] = useState('');
   const [aiChat, setAiChat] = useState([
-    { sender: 'mentor', text: `Hi there! I am your AI Mentor. Let me help you complete the "${milestone.title}" milestone. Ask me questions, request debugging, or tap for a hint!` }
+    { sender: 'mentor', text: `Welcome to the IDE clone! Let's get started on "${milestone.title}". I am your AI Mentor. Let me know if you need any hints!` }
   ]);
   const [showSolution, setShowSolution] = useState(false);
 
-  // Sync editor value when active file changes
+  // Sync state values on active file change
   useEffect(() => {
     setCodeValue(files[activeFile]);
   }, [activeFile]);
 
-  // Run the code into simulated preview
   const handleRunCode = () => {
     const updatedFiles = { ...files, [activeFile]: codeValue };
     setFiles(updatedFiles);
     
-    // Simple HTML parsing for preview rendering
+    // Parse combined preview content
     let htmlContent = updatedFiles['index.html'] || '';
     if (updatedFiles['styles.css']) {
       htmlContent = htmlContent.replace('</head>', `<style>${updatedFiles['styles.css']}</style></head>`);
@@ -74,136 +82,103 @@ console.log("Workspace initialized successfully!");`
     }
 
     setPreviewSrc(htmlContent);
-    setConsoleLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] Executed active environment.`]);
+    setConsoleLogs(prev => [...prev, `[Console] Executed files at ${new Date().toLocaleTimeString()}`]);
   };
 
   const handleAskMentor = (e) => {
-    e?.preventDefault();
+    e.preventDefault();
     if (!aiInput.trim()) return;
 
     const userMsg = aiInput;
     setAiChat(prev => [...prev, { sender: 'student', text: userMsg }]);
     setAiInput('');
 
-    // Simulate AI Mentor response
     setTimeout(() => {
-      let mentorResponse = `That is a great question! For "${milestone.title}", let's consider checking if your tags are closed properly. Remember, every structural HTML element requires clear entry and exit markers.`;
+      let mentorResponse = `Good approach. Keep checking your syntax variables. For this step, let's verify if your HTML selectors match the CSS targets.`;
       if (userMsg.toLowerCase().includes('hint')) {
-        mentorResponse = `Hint: Try structuring your elements inside a main wrapper tag. To support accessibility, use semantic elements like <header>, <nav> or <footer>.`;
+        mentorResponse = `AI Mentor Hint: Use semantic tags like <section> or <article> to group body contents. Avoid overloading generic <div> wrappers.`;
       } else if (userMsg.toLowerCase().includes('solution') || userMsg.toLowerCase().includes('code')) {
-        mentorResponse = `I cannot reveal the exact solution directly! However, if you look at the elements list, you should wrap your bio paragraphs with <p> tags and titles with <h1>. Check the "Solution" button if you get stuck.`;
+        mentorResponse = `To maintain the learning journey, I can't write out the final code blocks for you. However, you can toggle the "View Solution" reference code overlay to check your structural setup.`;
       }
       setAiChat(prev => [...prev, { sender: 'mentor', text: mentorResponse }]);
-    }, 1000);
+    }, 800);
   };
 
   const triggerHint = () => {
-    setAiChat(prev => [...prev, { sender: 'student', text: 'Please give me a hint for this task!' }]);
+    setAiChat(prev => [...prev, { sender: 'student', text: 'Give me a quick hint!' }]);
     setTimeout(() => {
-      setAiChat(prev => [...prev, { sender: 'mentor', text: `Hint: Make sure the file contains your core wrapper. In index.html, check that you have added the main structure before nesting content.` }]);
-    }, 600);
+      setAiChat(prev => [...prev, { sender: 'mentor', text: 'AI Mentor Hint: Ensure your styles.css includes the body backdrop properties correctly.' }]);
+    }, 500);
   };
 
-  const formatCode = () => {
-    // Basic indentation beautifier
-    const lines = codeValue.split('\n');
-    let indent = 0;
-    const formatted = lines.map(line => {
-      let trimmed = line.trim();
-      if (trimmed.startsWith('</') || trimmed.startsWith('}')) indent = Math.max(0, indent - 2);
-      const output = ' '.repeat(indent) + trimmed;
-      if ((trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>') && !trimmed.includes('</')) || trimmed.endsWith('{')) {
-        indent += 2;
+  const handleReset = () => {
+    if (window.confirm('Reset this file to starter defaults? All unsaved edits will be lost.')) {
+      if (activeFile === 'index.html') {
+        setCodeValue(`<!DOCTYPE html><html><body><h1>Starter</h1></body></html>`);
+      } else {
+        setCodeValue('');
       }
-      return output;
-    }).join('\n');
-    setCodeValue(formatted);
-    setConsoleLogs(prev => [...prev, 'Formatted active file content.']);
-  };
-
-  const submitMilestone = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        await fetch('http://localhost:5000/api/progress/update', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            projectId,
-            tech,
-            progressPercentage: 100,
-            lastCompletedMilestone: milestoneId
-          })
-        });
-      }
-    } catch(err) {
-      console.warn("Failed to sync progress with backend database.");
+      setConsoleLogs(prev => [...prev, `[Console] Reset active file.`]);
     }
-    alert('Congratulations! Milestone completed successfully. +250 XP awarded!');
+  };
+
+  const submitMilestone = () => {
+    updateProjectProgress(projectId, 100);
+    addToast('Project completed successfully! +250 XP awarded.', 'success');
     navigate('/dashboard');
   };
 
+  if (!user) return null;
+
   return (
-    <StyledWorkspace>
+    <StyledWorkspace themeMode={theme}>
       {/* Workspace Header */}
       <div className="workspace-header">
         <button className="back-btn" onClick={() => navigate('/dashboard')}>← Dashboard</button>
         <span className="project-title">{tech} / {project?.title} - {milestone.title}</span>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px' }}>
-          <button className="action-btn format" onClick={formatCode}>Beautify</button>
-          <button className="action-btn run" onClick={handleRunCode}>Run Code</button>
-          <button className="action-btn solution-btn" onClick={() => setShowSolution(!showSolution)}>
-            {showSolution ? 'Hide Solution' : 'View Solution'}
+          <button className="action-btn run" onClick={handleRunCode}>Run Page</button>
+          <button className="action-btn reset" onClick={handleReset}>Reset</button>
+          <button className="action-btn solution" onClick={() => setShowSolution(!showSolution)}>
+            {showSolution ? 'Hide Solution' : 'Solution'}
           </button>
-          <button className="action-btn submit" onClick={submitMilestone}>Submit Milestone</button>
+          <button className="action-btn submit" onClick={submitMilestone}>Complete Project</button>
         </div>
       </div>
 
-      {/* Workspace Main Panels */}
       <div className="panels-container">
-        
-        {/* Left Column: Lesson Instructions */}
-        <div className="panel instruction-panel">
-          <div className="panel-header">📝 Instructions & Objectives</div>
-          <div className="panel-body">
-            <h3>{milestone.title}</h3>
-            <p>{milestone.desc}</p>
-            <div className="objectives-box">
-              <strong>Objectives:</strong>
-              <ul>
-                <li>Create container semantic structural tags.</li>
-                <li>Add profile card elements or styles.</li>
-                <li>Link styles.css cleanly inside index.html.</li>
-              </ul>
-            </div>
-            <div className="practice-box">
-              <strong>Practice Task:</strong>
-              <p style={{ fontSize: '0.85rem', margin: '5px 0' }}>Write an inline header that says welcome and style it with color variables.</p>
+        {/* Left: Explorer & Milestones */}
+        <div className="panel left-explorer">
+          <div className="panel-header">📂 VS Code Explorer</div>
+          <div className="file-tree">
+            {Object.keys(files).map(name => (
+              <div 
+                key={name}
+                className={`file-item ${activeFile === name ? 'active' : ''}`}
+                onClick={() => {
+                  setFiles(prev => ({ ...prev, [activeFile]: codeValue }));
+                  setActiveFile(name);
+                }}
+              >
+                <span className="icon">{name.endsWith('html') ? '📄' : name.endsWith('css') ? '🎨' : '⚡'}</span>
+                {name}
+              </div>
+            ))}
+          </div>
+
+          <div className="panel-header" style={{ marginTop: '20px' }}>🎯 Milestone Steps</div>
+          <div className="milestones-sidebar">
+            <div className="milestone-details">
+              <h4>{milestone.title}</h4>
+              <p>{milestone.desc}</p>
             </div>
           </div>
         </div>
 
-        {/* Center Column: Files & Code Editor */}
-        <div className="panel editor-panel">
+        {/* Center: Simulated Code Editor */}
+        <div className="panel editor-pane">
           <div className="panel-header flex-header">
-            <span>💻 Code Editor</span>
-            <div className="file-tabs">
-              {Object.keys(files).map(name => (
-                <button 
-                  key={name}
-                  className={`file-tab ${activeFile === name ? 'active' : ''}`}
-                  onClick={() => {
-                    setFiles(prev => ({ ...prev, [activeFile]: codeValue }));
-                    setActiveFile(name);
-                  }}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
+            <span>💻 Code Editor - {activeFile}</span>
           </div>
           <div className="editor-container">
             <textarea 
@@ -214,89 +189,78 @@ console.log("Workspace initialized successfully!");`
             />
             {showSolution && (
               <div className="solution-overlay">
-                <h4>Solution Reference Code:</h4>
+                <h4>Solution reference code:</h4>
                 <pre>
                   {activeFile === 'index.html' && `<!-- Solution index.html -->
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background-color: #0f172a; text-align: center; }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Welcome to Fullstack Learning</h1>
-  </header>
-  <main>
-    <p>Success starts here.</p>
-  </main>
+  <h1>Completed Milestone</h1>
 </body>
 </html>`}
                   {activeFile === 'styles.css' && `/* Solution styles.css */
-body {
-  background-color: #0f172a;
-  color: #f8fafc;
-}`}
+h1 { color: #38bdf8; }`}
                   {activeFile === 'script.js' && `// Solution script.js
-console.log("Solution code loaded successfully.");`}
+console.log("Milestone code validated!");`}
                 </pre>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: Preview & AI Mentor Chat */}
-        <div className="panel preview-ai-panel">
-          <div className="preview-split">
-            {/* Live Preview */}
-            <div className="sub-panel preview-sub">
-              <div className="panel-header">👀 Live Preview & Console</div>
-              <div className="preview-viewport">
-                {previewSrc ? (
-                  <iframe 
-                    title="Live Preview Output"
-                    srcDoc={previewSrc}
-                    sandbox="allow-scripts"
-                    className="preview-iframe"
-                  />
-                ) : (
-                  <div className="empty-preview">Click "Run Code" to view interactive rendering outputs.</div>
-                )}
-              </div>
-              <div className="terminal-logs">
-                {consoleLogs.map((log, idx) => (
-                  <div key={idx} className="log-line">{log}</div>
-                ))}
-              </div>
-            </div>
-
-            {/* AI Mentor chatbot */}
-            <div className="sub-panel ai-sub">
-              <div className="panel-header flex-header">
-                <span>🤖 AI Mentor</span>
-                <button className="hint-btn" onClick={triggerHint}>Get Hint</button>
-              </div>
-              <div className="chat-history">
-                {aiChat.map((msg, idx) => (
-                  <div key={idx} className={`chat-bubble ${msg.sender}`}>
-                    <span className="bubble-author">{msg.sender === 'mentor' ? 'AI Mentor' : 'You'}</span>
-                    <p>{msg.text}</p>
-                  </div>
-                ))}
-              </div>
-              <form onSubmit={handleAskMentor} className="chat-input-form">
-                <input 
-                  type="text" 
-                  placeholder="Ask the AI mentor for advice or debugging help..."
-                  value={aiInput}
-                  onChange={(e) => setAiInput(e.target.value)}
-                  className="chat-input"
+        {/* Right: Live Preview & AI Chat */}
+        <div className="panel right-split">
+          <div className="split-half preview-sub">
+            <div className="panel-header">👀 Live Browser View</div>
+            <div className="preview-viewport">
+              {previewSrc ? (
+                <iframe 
+                  title="Render preview Frame"
+                  srcDoc={previewSrc}
+                  sandbox="allow-scripts"
+                  className="preview-iframe"
                 />
-                <button type="submit" className="chat-submit-btn">Ask</button>
-              </form>
+              ) : (
+                <div className="empty-preview">Click "Run Page" to compile code.</div>
+              )}
+            </div>
+            <div className="terminal-logs">
+              {consoleLogs.map((log, idx) => (
+                <div key={idx} className="log-line">{log}</div>
+              ))}
             </div>
           </div>
-        </div>
 
+          <div className="split-half ai-sub">
+            <div className="panel-header flex-header">
+              <span>🤖 AI Mentor Assistant</span>
+              <button className="hint-btn" onClick={triggerHint}>Hint</button>
+            </div>
+            <div className="chat-history">
+              {aiChat.map((msg, idx) => (
+                <div key={idx} className={`chat-bubble ${msg.sender}`}>
+                  <span className="bubble-author">{msg.sender === 'mentor' ? 'AI Mentor' : 'You'}</span>
+                  <p>{msg.text}</p>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleAskMentor} className="chat-input-form">
+              <input 
+                type="text" 
+                placeholder="Ask developer mentor a question..."
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                className="chat-input"
+              />
+              <button type="submit" className="chat-submit-btn">Ask</button>
+            </form>
+          </div>
+        </div>
       </div>
     </StyledWorkspace>
   );
@@ -306,38 +270,31 @@ const StyledWorkspace = styled.div`
   display: flex;
   flex-direction: column;
   height: calc(100vh - 4rem);
-  background: #09090c;
-  color: #fff;
-  font-family: system-ui, sans-serif;
+  background: ${props => props.themeMode === 'dark' ? '#09090c' : '#f9f9fb'};
+  color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
 
   .workspace-header {
-    background: #111116;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: ${props => props.themeMode === 'dark' ? '#111116' : '#fff'};
+    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
     padding: 10px 20px;
     display: flex;
     align-items: center;
     gap: 15px;
-    z-index: 10;
   }
 
   .back-btn {
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: ${props => props.themeMode === 'dark' ? '#fff' : '#333'};
     padding: 6px 14px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.85rem;
-    height: auto;
     position: static;
     transform: none;
+    height: auto;
+    min-width: auto;
     box-shadow: none;
-  }
-
-  .project-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #ccc;
   }
 
   .action-btn {
@@ -348,117 +305,83 @@ const StyledWorkspace = styled.div`
     cursor: pointer;
     font-weight: bold;
     font-size: 0.85rem;
-    height: auto;
-    min-width: 0;
     position: static;
     transform: none;
+    height: auto;
+    min-width: auto;
     box-shadow: none;
   }
 
-  .action-btn.format { background: rgba(255, 255, 255, 0.1); }
   .action-btn.run { background: #00d2ff; color: #000; }
-  .action-btn.solution-btn { background: #af40ff; }
+  .action-btn.reset { background: rgba(255, 0, 0, 0.2); border: 1px solid rgba(255, 0, 0, 0.3); color: #ff4d4d; }
+  .action-btn.solution { background: #af40ff; }
   .action-btn.submit { background: #10ac84; }
 
   .panels-container {
     display: grid;
-    grid-template-columns: 300px 1fr 400px;
+    grid-template-columns: 240px 1fr 400px;
     flex: 1;
     overflow: hidden;
-  }
-
-  @media (max-width: 1200px) {
-    .panels-container {
-      grid-template-columns: 240px 1fr 320px;
-    }
   }
 
   .panel {
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
     overflow: hidden;
   }
 
   .panel-header {
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.02)'};
+    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,0.08)'};
     padding: 10px 15px;
     font-size: 0.8rem;
     font-weight: bold;
     color: #888;
-    text-transform: uppercase;
-    letter-spacing: 1px;
   }
 
-  .flex-header {
+  /* File Tree style */
+  .file-tree {
+    padding: 10px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .panel-body {
-    padding: 20px;
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  .panel-body h3 {
-    margin-top: 0;
-    font-size: 1.25rem;
-  }
-
-  .panel-body p {
-    color: #ccc;
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
-
-  .objectives-box, .practice-box {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    padding: 15px;
-    margin-top: 20px;
-  }
-
-  .objectives-box ul {
-    margin: 10px 0 0 0;
-    padding-left: 20px;
-    font-size: 0.85rem;
-    line-height: 1.6;
-    color: #ccc;
-  }
-
-  /* Editor Panel */
-  .editor-panel {
-    background: #0d0d11;
-  }
-
-  .file-tabs {
-    display: flex;
+    flex-direction: column;
     gap: 5px;
   }
 
-  .file-tab {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 0.75rem;
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 3px;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: 0;
-    box-shadow: none;
-    font-weight: 500;
+    font-size: 0.85rem;
+    color: #aaa;
   }
 
-  .file-tab.active {
-    background: rgba(255, 255, 255, 0.08);
+  .file-item.active, .file-item:hover {
+    background: rgba(255, 255, 255, 0.05);
     color: #fff;
+  }
+
+  .milestones-sidebar {
+    padding: 15px;
+  }
+
+  .milestone-details h4 {
+    margin: 0 0 5px 0;
+  }
+
+  .milestone-details p {
+    font-size: 0.85rem;
+    color: #888;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* Code Editor */
+  .editor-pane {
+    background: ${props => props.themeMode === 'dark' ? '#0d0d11' : '#fff'};
   }
 
   .editor-container {
@@ -472,8 +395,8 @@ const StyledWorkspace = styled.div`
     height: 100%;
     background: none;
     border: none;
-    color: #f8fafc;
-    font-family: 'Courier New', Courier, monospace;
+    color: ${props => props.themeMode === 'dark' ? '#f8fafc' : '#333'};
+    font-family: monospace;
     font-size: 0.95rem;
     padding: 20px;
     box-sizing: border-box;
@@ -488,37 +411,19 @@ const StyledWorkspace = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(13, 13, 17, 0.95);
+    background: ${props => props.themeMode === 'dark' ? 'rgba(13, 13, 17, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
     border-left: 3px solid #af40ff;
   }
 
-  .solution-overlay h4 {
-    margin-top: 0;
-    color: #af40ff;
-  }
-
-  .solution-overlay pre {
-    color: #ccc;
-    font-family: monospace;
-    font-size: 0.85rem;
-    line-height: 1.4;
-  }
-
-  /* Right column: Split Preview / AI Mentor */
-  .preview-ai-panel {
+  /* Right column split preview & AI chat */
+  .right-split {
     border-right: none;
   }
 
-  .preview-split {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  .sub-panel {
+  .split-half {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -526,12 +431,12 @@ const StyledWorkspace = styled.div`
   }
 
   .preview-sub {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
   }
 
   .preview-viewport {
     flex: 1;
-    background: #1e1e24;
+    background: #fff;
     position: relative;
   }
 
@@ -539,7 +444,6 @@ const StyledWorkspace = styled.div`
     width: 100%;
     height: 100%;
     border: none;
-    background: #fff;
   }
 
   .empty-preview {
@@ -548,9 +452,8 @@ const StyledWorkspace = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    text-align: center;
-    color: #666;
+    color: #888;
+    background: ${props => props.themeMode === 'dark' ? '#1c1c24' : '#eee'};
     font-size: 0.85rem;
   }
 
@@ -563,14 +466,9 @@ const StyledWorkspace = styled.div`
     padding: 10px;
     box-sizing: border-box;
     color: #10ac84;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .log-line {
-    margin-bottom: 4px;
-  }
-
-  /* AI Chat Area */
+  /* AI Chat style */
   .chat-history {
     flex: 1;
     overflow-y: auto;
@@ -578,7 +476,7 @@ const StyledWorkspace = styled.div`
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: #111116;
+    background: ${props => props.themeMode === 'dark' ? '#111116' : '#f1f1f5'};
   }
 
   .chat-bubble {
@@ -586,12 +484,11 @@ const StyledWorkspace = styled.div`
     border-radius: 8px;
     max-width: 85%;
     font-size: 0.85rem;
-    line-height: 1.4;
   }
 
   .chat-bubble.mentor {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#fff'};
+    border: 1px solid rgba(0, 0, 0, 0.05);
     align-self: flex-start;
   }
 
@@ -604,30 +501,26 @@ const StyledWorkspace = styled.div`
   .bubble-author {
     font-size: 0.7rem;
     font-weight: bold;
-    color: #666;
+    color: #888;
     display: block;
     margin-bottom: 4px;
-  }
-
-  .chat-bubble p {
-    margin: 0;
   }
 
   .chat-input-form {
     display: flex;
     padding: 10px;
     background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
     gap: 8px;
   }
 
   .chat-input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#fff'};
+    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
     border-radius: 4px;
     padding: 8px 12px;
-    color: #fff;
+    color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
     outline: none;
     font-size: 0.85rem;
   }
@@ -640,25 +533,26 @@ const StyledWorkspace = styled.div`
     padding: 8px 16px;
     font-weight: bold;
     cursor: pointer;
-    font-size: 0.85rem;
-    height: auto;
     position: static;
     transform: none;
+    height: auto;
+    min-width: auto;
     box-shadow: none;
   }
 
   .hint-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
+    background: rgba(0, 210, 255, 0.1);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    color: #00d2ff;
     border-radius: 3px;
     font-size: 0.75rem;
     padding: 4px 8px;
     cursor: pointer;
     font-weight: bold;
-    height: auto;
     position: static;
     transform: none;
+    height: auto;
+    min-width: auto;
     box-shadow: none;
   }
 `;
