@@ -41,7 +41,7 @@ const AdminPanel = () => {
               <input 
                 type="email" 
                 required 
-                placeholder="admin@gmail.com"
+                placeholder="mailadmin@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />

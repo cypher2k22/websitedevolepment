@@ -34,10 +34,10 @@ export const AppProvider = ({ children }) => {
   };
 
   const login = (email, password) => {
-    if (email === 'admin@gmail.com' && password === '123') {
+    if (email === 'mailadmin@gmail.com' && password === '123') {
       const adminSession = {
         name: 'Administrator',
-        email: 'admin@gmail.com',
+        email: 'mailadmin@gmail.com',
         role: 'admin',
         xp: 9999,
         level: 99,
