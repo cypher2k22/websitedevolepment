@@ -1,0 +1,133 @@
+/* --- GLOBAL STYLES --- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  /* Ensure your background image covers the screen cleanly */
+  background: url('./assets/images.png') no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* --- FIXED HEADER --- */
+.header {
+  position: relative;
+  color: #ffffff; 
+  background-color: rgb(21, 21, 21);
+  width: 100%;
+  height: 4rem; /* Increased slightly to give buttons breathing room */
+  padding: 0 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center; 
+}
+
+/* Added a clear, high-contrast title inside your header so the left isn't empty */
+.header-title {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+/* --- ACCESSIBLE RIGHT CORNER BUTTONS --- */
+.header button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%); /* Perfectly centers buttons vertically inside the header */
+  align-items: center;
+  background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+  border: none; 
+  border-radius: 5px;
+  box-sizing: border-box;
+  color: #ffffff; 
+  display: flex;
+  font-size: 14px; /* Scaled down slightly to fit cleanly in header */
+  font-weight: bold; 
+  justify-content: center;
+  height: 2.2rem; 
+  min-width: 110px;
+  padding: 2px; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Positions the two buttons cleanly without overlapping */
+.header button.menu-btn {
+  right: 150px;
+}
+
+.header button.profile-btn {
+  right: 20px;
+}
+
+.header button:hover {
+  transform: translateY(-50%) scale(1.05); /* Combines vertical alignment with hover scale */
+}
+
+.header button span {
+  background-color: rgb(5, 6, 45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px; 
+  width: 100%;
+  height: 100%;
+  padding: 0 15px;
+}
+
+.header button:hover span {
+  background: transparent;
+}
+
+/* --- MAIN HERO CONTENT --- */
+.hero-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #ffffff; /* Changed from black to white */
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.7); /* Deep drop-shadow so it slices through the background noise */
+  margin-top: 40px;
+  text-transform: uppercase;
+}
+
+/* --- HIGH-CONTRAST FROSTED CARDS --- */
+.card-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 50px;
+  padding: 20px;
+}
+
+.card {
+  width: 220px;
+  height: 300px;
+  /* Authentic Glassmorphism: Backdrop-filter creates the blur effect */
+  background: rgba(255, 255, 255, 0.15); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px); /* Lifts up smoothly on hover */
+  background: rgba(255, 255, 255, 0.25); /* Brightens up slightly */
+  box-shadow: 0 12px 40px 0 rgba(170, 59, 255, 0.3); /* Adds a subtle neon purple glow */
+}
+
+.card h3 {
+  color: #ffffff; /* Changed from black to crisp white */
+  font-size: 1.25rem;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Guarantees readability */
+}
