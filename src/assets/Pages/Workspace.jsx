@@ -121,8 +121,28 @@ console.log("Workspace initialized successfully!");`
     setConsoleLogs(prev => [...prev, 'Formatted active file content.']);
   };
 
-  const submitMilestone = () => {
-    alert('Congratulations! Milestone completed successfully. +150 XP awarded!');
+  const submitMilestone = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await fetch('http://localhost:5000/api/progress/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            projectId,
+            tech,
+            progressPercentage: 100,
+            lastCompletedMilestone: milestoneId
+          })
+        });
+      }
+    } catch(err) {
+      console.warn("Failed to sync progress with backend database.");
+    }
+    alert('Congratulations! Milestone completed successfully. +250 XP awarded!');
     navigate('/dashboard');
   };
 

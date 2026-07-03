@@ -20,8 +20,8 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPath, setSelectedPath] = useState('Frontend Path');
 
-  // Simulated gamification state
-  const userStats = {
+  // State-driven gamification stats
+  const [userStats, setUserStats] = useState({
     xp: 2450,
     level: 12,
     streak: 5,
@@ -29,7 +29,34 @@ const Dashboard = () => {
     completedLessons: 18,
     completedProjects: 2,
     badges: ['HTML Beginner', 'CSS Wizard', 'Code Rookie', '5-Day Streak']
-  };
+  });
+
+  React.useEffect(() => {
+    const fetchUserStats = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/user', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUserStats(prev => ({
+            ...prev,
+            xp: data.xp ?? prev.xp,
+            level: data.level ?? prev.level,
+            streak: data.streak ?? prev.streak,
+            coins: data.coins ?? prev.coins,
+            badges: data.badges?.length ? data.badges : prev.badges,
+            completedProjects: data.completedProjects?.length ? data.completedProjects.length : prev.completedProjects
+          }));
+        }
+      } catch (err) {
+        console.warn('Backend server offline. Keeping simulated dashboard data.');
+      }
+    };
+    fetchUserStats();
+  }, []);
 
   // Simulated project progress (percentage complete)
   const projectProgress = {
