@@ -36,6 +36,11 @@ mongoose.connect(mongoURI)
     console.warn('MongoDB connection failed. Using local mockup fallback storage mode.');
   });
 
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+  });
+}
+
+export default app;
+
