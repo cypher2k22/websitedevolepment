@@ -32,20 +32,17 @@ body {
 }
 
 /* --- ACCESSIBLE RIGHT CORNER BUTTONS --- */
-.header button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%); /* Perfectly centers buttons vertically inside the header */
+.header .header-btn {
+  display: flex;
   align-items: center;
-  background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+  justify-content: center;
+  background-image: linear-gradient(135deg, #00d2ff, #af40ff);
   border: none; 
-  border-radius: 5px;
+  border-radius: 6px;
   box-sizing: border-box;
   color: #ffffff; 
-  display: flex;
-  font-size: 14px; /* Scaled down slightly to fit cleanly in header */
+  font-size: 14px;
   font-weight: bold; 
-  justify-content: center;
   height: 2.2rem; 
   min-width: 110px;
   padding: 2px; 
@@ -53,20 +50,11 @@ body {
   transition: all 0.2s ease;
 }
 
-/* Positions the two buttons cleanly without overlapping */
-.header button.menu-btn {
-  right: 150px;
+.header .header-btn:hover {
+  transform: scale(1.05);
 }
 
-.header button.profile-btn {
-  right: 20px;
-}
-
-.header button:hover {
-  transform: translateY(-50%) scale(1.05); /* Combines vertical alignment with hover scale */
-}
-
-.header button span {
+.header .header-btn span {
   background-color: rgb(5, 6, 45);
   display: flex;
   align-items: center;
@@ -75,9 +63,10 @@ body {
   width: 100%;
   height: 100%;
   padding: 0 15px;
+  transition: background 0.2s ease;
 }
 
-.header button:hover span {
+.header .header-btn:hover span {
   background: transparent;
 }
 
@@ -130,4 +119,31 @@ body {
   font-size: 1.25rem;
   letter-spacing: 1px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Guarantees readability */
+}
+
+/* --- MOBILE RESPONSIVENESS FOR HEADER --- */
+@media (max-width: 768px) {
+  .header {
+    height: auto !important;
+    padding: 15px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 15px !important;
+  }
+  
+  .header-nav {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: center;
+    order: 3;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .header-widgets {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: center;
+    order: 2;
+  }
 }

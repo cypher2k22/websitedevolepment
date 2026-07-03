@@ -48,7 +48,7 @@ function Header() {
       </nav>
 
       {/* Theme Switch & Login / Profile widgets */}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
+      <div className="header-widgets" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
         {/* Dark/Light mode toggle */}
         <button 
           onClick={toggleTheme}
@@ -60,12 +60,7 @@ function Header() {
             padding: '5px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            position: 'static',
-            transform: 'none',
-            height: 'auto',
-            minWidth: 'auto',
-            boxShadow: 'none'
+            justifyContent: 'center'
           }}
           aria-label="Toggle Dark/Light Mode"
         >
@@ -80,17 +75,24 @@ function Header() {
             <button 
               onClick={() => { logout(); navigate('/'); }}
               style={{
-                position: 'static',
-                transform: 'none',
                 height: '2rem',
                 minWidth: '90px',
-                fontSize: '0.8rem',
+                fontSize: '0.85rem',
                 borderRadius: '6px',
-                backgroundImage: 'none',
-                backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                border: '1px solid rgba(255, 0, 0, 0.3)',
+                backgroundColor: 'rgba(255, 77, 77, 0.15)',
+                border: '1px solid rgba(255, 77, 77, 0.4)',
                 color: '#ff4d4d',
-                cursor: 'pointer'
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#ff4d4d';
+                e.currentTarget.style.color = '#fff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 77, 77, 0.15)';
+                e.currentTarget.style.color = '#ff4d4d';
               }}
             >
               Log Out
@@ -98,22 +100,10 @@ function Header() {
           </div>
         ) : (
           <button 
-            className="menu-btn" 
+            className="header-btn" 
             onClick={() => navigate('/login')}
-            style={{
-              position: 'static',
-              transform: 'none',
-              height: '2.2rem',
-              minWidth: '100px',
-              fontSize: '0.85rem',
-              backgroundImage: 'linear-gradient(135deg, #00d2ff, #af40ff)',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              color: '#fff'
-            }}
           >
-            <span style={{ background: 'transparent', padding: 0 }}>Login</span>
+            <span>Login</span>
           </button>
         )}
       </div>

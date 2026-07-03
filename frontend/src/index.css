@@ -11,7 +11,7 @@
 }
 
 /* Button styles from Uiverse.io with accessibility enhancements */ 
-button {
+.uiverse-btn {
   position: absolute;
   right: 10px;
   align-items: center;
@@ -36,16 +36,16 @@ button {
 }
 
 /* Accessible Focus States */
-button:focus-visible {
+.uiverse-btn:focus-visible {
   outline: 3px solid #ece9e9;
   outline-offset: 4px;
 }
 
-button:active {
+.uiverse-btn:active {
   transform: scale(0.95); 
 }
 
-button span {
+.uiverse-btn span {
   background-color: #51008f;
   display: flex;
   align-items: center;
@@ -57,8 +57,8 @@ button span {
   transition: background 300ms;
 }
 
-button:hover span,
-button:focus span {
+.uiverse-btn:hover span,
+.uiverse-btn:focus span {
   background: transparent; /* Seamlessly reveals the dark background gradient on hover */
 }
 .menu{
