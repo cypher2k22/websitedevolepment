@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
@@ -30,12 +30,22 @@ const Workspace = () => {
 
   const [activeFile, setActiveFile] = useState('index.html');
   const [codeValue, setCodeValue] = useState('');
-  const [consoleLogs, setConsoleLogs] = useState(['Docker container spinning up...', 'Filesystem ready.']);
+  const [consoleLogs, setConsoleLogs] = useState(['Container virtual thread spinning up...', 'Local file host bound to port 3000.', 'Vite Dev Server started.']);
   const [previewSrc, setPreviewSrc] = useState('');
   const [aiInput, setAiInput] = useState('');
   const [aiChat, setAiChat] = useState([]);
   const [showSolution, setShowSolution] = useState(false);
   const [checklistState, setChecklistState] = useState({});
+  const [autosaveText, setAutosaveText] = useState('All changes saved');
+
+  // Layout states
+  const [leftWidth, setLeftWidth] = useState(320);
+  const [rightWidth, setRightWidth] = useState(420);
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
+  const [rightSubTab, setRightSubTab] = useState('preview');
+  
+  // Custom Execution State for neon ambient glow pulse
+  const [executionStatus, setExecutionStatus] = useState('idle'); // 'idle', 'success', 'error'
 
   useEffect(() => {
     if (project) {
@@ -54,9 +64,11 @@ const Workspace = () => {
       ]);
 
       const initialChecklist = {};
-      project.requirements.forEach(req => {
-        initialChecklist[req.id] = false;
-      });
+      if (project.requirements) {
+        project.requirements.forEach(req => {
+          initialChecklist[req.id] = false;
+        });
+      }
       setChecklistState(initialChecklist);
     }
   }, [project]);
@@ -65,7 +77,17 @@ const Workspace = () => {
     setCodeValue(files[activeFile] || '');
   }, [activeFile, files]);
 
+  const handleEditorChange = (val) => {
+    setCodeValue(val);
+    setAutosaveText('Saving...');
+    setFiles(prev => ({ ...prev, [activeFile]: val }));
+    setTimeout(() => {
+      setAutosaveText('All changes saved');
+    }, 800);
+  };
+
   const handleRunCode = () => {
+    setExecutionStatus('success');
     const updatedFiles = { ...files, [activeFile]: codeValue };
     setFiles(updatedFiles);
     
@@ -84,8 +106,10 @@ const Workspace = () => {
     }
 
     setPreviewSrc(htmlContent);
-    setConsoleLogs(prev => [...prev, `[System] Compiled and rendered active viewport at ${new Date().toLocaleTimeString()}`]);
-    addToast('Code compilation successful.', 'success');
+    setConsoleLogs(prev => [...prev, `[Vite] Reloading page viewport...`, `[System] Compiled successfully at ${new Date().toLocaleTimeString()}`]);
+    addToast('Compilation successful.', 'success');
+    
+    setTimeout(() => setExecutionStatus('idle'), 4000);
   };
 
   const handleAskMentor = (e) => {
@@ -101,7 +125,7 @@ const Workspace = () => {
       if (userMsg.toLowerCase().includes('hint')) {
         mentorResponse = `AI Mentor Hint: To clear this requirement, verify that your inputs hold unique ID selectors so that script.js binds to them smoothly.`;
       } else if (userMsg.toLowerCase().includes('solution') || userMsg.toLowerCase().includes('code')) {
-        mentorResponse = `I won't write out the code for you directly. But you can check the "Solution" overlay at the header as a guidance reference.`;
+        mentorResponse = `I won't write out the code for you directly. But you can check the "Solution" reference at the header as a guidance reference.`;
       }
       setAiChat(prev => [...prev, { sender: 'mentor', text: mentorResponse }]);
     }, 600);
@@ -115,6 +139,7 @@ const Workspace = () => {
   };
 
   const handleReset = () => {
+    setExecutionStatus('error');
     if (window.confirm('Are you sure you want to discard your edits and reset the starter files?')) {
       const initialFiles = project.starterCode || {};
       setFiles(initialFiles);
@@ -122,6 +147,7 @@ const Workspace = () => {
       setPreviewSrc(initialFiles['index.html'] || '');
       setConsoleLogs(prev => [...prev, '[System] Reset workspace environment.']);
     }
+    setTimeout(() => setExecutionStatus('idle'), 4000);
   };
 
   const submitFinalProject = () => {
@@ -142,503 +168,1108 @@ const Workspace = () => {
     }));
   };
 
+  // Resize Handlers
+  const startResizeLeft = (e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = leftWidth;
+
+    const doDrag = (moveEvent) => {
+      const newWidth = startWidth + (moveEvent.clientX - startX);
+      if (newWidth > 180 && newWidth < 500) {
+        setLeftWidth(newWidth);
+      }
+    };
+
+    const stopDrag = () => {
+      document.removeEventListener('mousemove', doDrag);
+      document.removeEventListener('mouseup', stopDrag);
+    };
+
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+  };
+
+  const startResizeRight = (e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = rightWidth;
+
+    const doDrag = (moveEvent) => {
+      const newWidth = startWidth - (moveEvent.clientX - startX);
+      if (newWidth > 200 && newWidth < 650) {
+        setRightWidth(newWidth);
+      }
+    };
+
+    const stopDrag = () => {
+      document.removeEventListener('mousemove', doDrag);
+      document.removeEventListener('mouseup', stopDrag);
+    };
+
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+  };
+
   if (!user) return null;
 
   return (
-    <StyledWorkspace themeMode={theme}>
-      <div className="workspace-header">
-        <button className="back-btn" onClick={() => navigate('/dashboard')}>← Dashboard</button>
-        <span className="project-title">{project?.technology} / {project?.title}</span>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px' }}>
-          <button className="action-btn run" onClick={handleRunCode}>Run Page</button>
-          <button className="action-btn reset" onClick={handleReset}>Reset</button>
-          <button className="action-btn solution" onClick={() => setShowSolution(!showSolution)}>
-            {showSolution ? 'Hide Solution' : 'Solution'}
-          </button>
-          <button className="action-btn submit" onClick={submitFinalProject}>Submit Project</button>
+    <StyledWorkspace themeMode={theme} executionStatus={executionStatus}>
+      {/* Dynamic Ambient Neon Glows */}
+      <div className="ambient-background-glow glow-1" />
+      <div className="ambient-background-glow glow-2" />
+
+      {/* 1. Global Header Bar (Floating Glassmorphic Capsule) */}
+      <header className="workspace-header-bar">
+        <button className="nav-back-btn" onClick={() => navigate('/dashboard')}>
+          <span className="icon">←</span> Dashboard
+        </button>
+        
+        <div className="workspace-breadcrumbs">
+          <span className="crumb">{project?.course}</span>
+          <span className="divider">/</span>
+          <span className="crumb active">{project?.title}</span>
         </div>
-      </div>
 
-      <div className="panels-container">
-        <div className="panel left-explorer">
-          <div className="panel-header">📝 Instructions & Goals</div>
-          <div className="instructions-body">
-            <h3>{project?.title}</h3>
-            <p className="goal-desc">{project?.objective}</p>
+        <div className="autosave-indicator">{autosaveText}</div>
 
-            {project?.fccReference && (
-              <a 
-                href={project.fccReference} 
-                target="_blank" 
-                rel="noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: 'rgba(99, 102, 241, 0.1)',
-                  border: '1px solid rgba(99, 102, 241, 0.3)',
-                  color: '#6366f1',
-                  textDecoration: 'none',
-                  fontSize: '0.8rem',
-                  fontWeight: 'bold',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  marginTop: '5px',
-                  marginBottom: '15px'
-                }}
-              >
-                📖 freeCodeCamp Reference Guide
-              </a>
-            )}
+        <div className="header-actions">
+          <button className="action-capsule-btn run" onClick={handleRunCode} title="Compile and run code">
+            Run Code
+          </button>
+          <button className="action-capsule-btn reset" onClick={handleReset} title="Reset starter code">
+            Reset
+          </button>
+          <button className="action-capsule-btn solution" onClick={() => setShowSolution(!showSolution)} title="Toggle solution overlay">
+            Solution
+          </button>
+          <button className="action-capsule-btn submit" onClick={submitFinalProject} title="Submit final project">
+            Submit
+          </button>
+        </div>
+      </header>
 
-            <div className="checklist-box">
-              <h4>Requirements Checklist</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
-                {project?.requirements.map(req => (
-                  <label key={req.id} className="checklist-item">
-                    <input 
-                      type="checkbox" 
-                      checked={!!checklistState[req.id]}
-                      onChange={() => handleChecklistToggle(req.id)}
-                    />
-                    <span style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>{req.text}</span>
-                  </label>
-                ))}
+      {/* 2. Resizable Panels Content Area */}
+      <div className="workspace-panes-wrapper">
+        
+        {/* LEFT PANEL: Instructions */}
+        <div 
+          className={`pane-panel instructions-panel ${isLeftCollapsed ? 'collapsed' : ''}`}
+          style={{ width: isLeftCollapsed ? 0 : `${leftWidth}px` }}
+        >
+          <div className="panel-header-toolbar">
+            <span className="panel-label">📖 Instructions</span>
+            <button 
+              className="chevron-collapse-btn" 
+              onClick={() => setIsLeftCollapsed(true)}
+              title="Collapse Panel"
+            >
+              ◀
+            </button>
+          </div>
+
+          <div className="panel-scroll-content">
+            <div className="instructions-body">
+              <h3 className="project-title">{project?.title}</h3>
+              <span className="difficulty-badge">{project?.difficulty}</span>
+              <p className="objective-text">{project?.objective}</p>
+
+              <div className="requirements-section">
+                <h4 className="section-title">Requirements Check-list</h4>
+                <div className="requirements-list">
+                  {project?.requirements?.map(req => (
+                    <label key={req.id} className="requirement-checkbox-item">
+                      <input 
+                        type="checkbox" 
+                        checked={!!checklistState[req.id]}
+                        onChange={() => handleChecklistToggle(req.id)}
+                      />
+                      <span className="checkbox-label">{req.text}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="milestones-section">
+                <h4 className="section-title">Target Milestone</h4>
+                <div className="milestone-detail-card">
+                  <strong className="milestone-title">{milestone.title}</strong>
+                  <p className="milestone-desc">{milestone.desc}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="panel editor-pane">
-          <div className="panel-header flex-header">
-            <span>💻 File Editor</span>
-            <div className="file-tabs">
-              {Object.keys(files).map(name => (
-                <button 
-                  key={name}
-                  className={`file-tab ${activeFile === name ? 'active' : ''}`}
-                  onClick={() => {
-                    setFiles(prev => ({ ...prev, [activeFile]: codeValue }));
-                    setActiveFile(name);
-                  }}
-                >
-                  {name}
-                </button>
+        {/* Collapsed Left Trigger */}
+        {isLeftCollapsed && (
+          <button 
+            className="collapsed-left-trigger" 
+            onClick={() => setIsLeftCollapsed(false)}
+            title="Expand Instructions Panel"
+          >
+            ▶
+          </button>
+        )}
+
+        {/* Left Resizer Drag Handle */}
+        {!isLeftCollapsed && (
+          <div className="drag-resize-handle" onMouseDown={startResizeLeft} />
+        )}
+
+        {/* CENTER PANE: Code Editor Area */}
+        <div className="pane-panel code-editor-panel">
+          <div className="editor-tab-row">
+            {Object.keys(files).map(name => (
+              <button 
+                key={name}
+                className={`editor-tab-item ${activeFile === name ? 'active' : ''}`}
+                onClick={() => setActiveFile(name)}
+              >
+                <span className="file-icon">{name.endsWith('.html') ? '📄' : name.endsWith('.css') ? '🎨' : '⚡'}</span>
+                {name}
+                {activeFile === name && <span className="tab-neon-accent" />}
+              </button>
+            ))}
+          </div>
+
+          <div className="editor-viewport-container">
+            <div className="line-gutter">
+              {Array.from({ length: Math.max(codeValue.split('\n').length, 25) }).map((_, i) => (
+                <div key={i} className="gutter-num">{i + 1}</div>
               ))}
             </div>
-          </div>
-          <div className="editor-container">
+
             <textarea 
               value={codeValue}
-              onChange={(e) => setCodeValue(e.target.value)}
-              className="code-textarea"
+              onChange={(e) => handleEditorChange(e.target.value)}
+              className="ide-code-textarea"
               spellCheck="false"
             />
+
             {showSolution && (
-              <div className="solution-overlay">
-                <h4>Solution reference code:</h4>
-                <pre>
+              <div className="editor-solution-overlay">
+                <div className="overlay-header">
+                  <span className="overlay-badge">💡 Solution Guide</span>
+                  <button className="close-overlay-btn" onClick={() => setShowSolution(false)}>×</button>
+                </div>
+                <pre className="overlay-pre">
                   {activeFile === 'index.html' && `<!-- Solution index.html -->
 <!DOCTYPE html>
 <html>
 <body>
-  <h1>Completed Milestone</h1>
+  <h1>Completed Layout</h1>
 </body>
 </html>`}
                   {activeFile === 'styles.css' && `/* Solution styles.css */
-body { background: #000; }`}
+body { background: #09090b; color: #fff; }`}
                   {activeFile === 'script.js' && `// Solution script.js
-console.log("Calculated!");`}
+console.log("Calculated successfully!");`}
                 </pre>
               </div>
             )}
           </div>
         </div>
 
-        <div className="panel right-split">
-          <div className="split-half preview-sub">
-            <div className="panel-header">👀 Live Browser View</div>
-            <div className="preview-viewport">
-              {previewSrc ? (
-                <iframe 
-                  title="Live preview viewport frame"
-                  srcDoc={previewSrc}
-                  sandbox="allow-scripts"
-                  className="preview-iframe"
-                />
-              ) : (
-                <div className="empty-preview">No active viewport render. Click Run Page.</div>
-              )}
-            </div>
-            <div className="terminal-logs">
-              {consoleLogs.map((log, idx) => (
-                <div key={idx} className="log-line">{log}</div>
-              ))}
-            </div>
+        {/* Right Resizer Drag Handle */}
+        <div className="drag-resize-handle" onMouseDown={startResizeRight} />
+
+        {/* RIGHT PANE: Preview & Mentor */}
+        <div className="pane-panel right-viewport-panel" style={{ width: `${rightWidth}px` }}>
+          <div className="right-panel-tabs">
+            <button 
+              className={`right-tab-btn ${rightSubTab === 'preview' ? 'active' : ''}`} 
+              onClick={() => setRightSubTab('preview')}
+            >
+              👀 Viewport
+            </button>
+            <button 
+              className={`right-tab-btn ${rightSubTab === 'mentor' ? 'active' : ''}`} 
+              onClick={() => setRightSubTab('mentor')}
+            >
+              🤖 AI Mentor
+            </button>
           </div>
 
-          <div className="split-half ai-sub">
-            <div className="panel-header flex-header">
-              <span>🤖 AI Mentor Assistant</span>
-              <button className="hint-btn" onClick={triggerHint}>Get Hint</button>
-            </div>
-            <div className="chat-history">
-              {aiChat.map((msg, idx) => (
-                <div key={idx} className={`chat-bubble ${msg.sender}`}>
-                  <span className="bubble-author">{msg.sender === 'mentor' ? 'AI Mentor' : 'You'}</span>
-                  <p>{msg.text}</p>
+          <div className="right-panel-body">
+            {rightSubTab === 'preview' ? (
+              <div className="live-preview-container">
+                <div className="iframe-viewport-wrapper">
+                  {previewSrc ? (
+                    <iframe 
+                      title="IDE Live Preview"
+                      srcDoc={previewSrc}
+                      sandbox="allow-scripts"
+                      className="live-preview-iframe"
+                    />
+                  ) : (
+                    <div className="empty-viewport-placeholder">
+                      <span className="icon">⚡</span>
+                      <p>Click "Run Code" above to load viewport preview.</p>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-            <form onSubmit={handleAskMentor} className="chat-input-form">
-              <input 
-                type="text" 
-                placeholder="Ask prompt mentor..."
-                value={aiInput}
-                onChange={(e) => setAiInput(e.target.value)}
-                className="chat-input"
-              />
-              <button type="submit" className="chat-submit-btn">Send</button>
-            </form>
+
+                {/* Console logger with dynamic ambient aura */}
+                <div className="virtual-console-panel">
+                  <div className="console-header-bar">DEVELOPMENT LOGS</div>
+                  <div className="console-log-lines">
+                    {consoleLogs.map((log, idx) => (
+                      <div key={idx} className="log-line-item">{log}</div>
+                    ))}
+                  </div>
+                  {/* Status Indicator glows */}
+                  <div className="console-aura-glow" />
+                </div>
+              </div>
+            ) : (
+              <div className="ai-mentor-container">
+                <div className="mentor-chat-header">
+                  <span className="mentor-status">● MENTOR ACTIVE</span>
+                  <button className="get-hint-action" onClick={triggerHint}>Get Hint</button>
+                </div>
+                
+                <div className="chat-dialog-history">
+                  {aiChat.map((msg, idx) => (
+                    <div key={idx} className={`dialog-bubble ${msg.sender}`}>
+                      <span className="bubble-sender">{msg.sender === 'mentor' ? 'AI Mentor' : 'You'}</span>
+                      <p className="bubble-text">{msg.text}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <form onSubmit={handleAskMentor} className="chat-input-form-bar">
+                  <input 
+                    type="text" 
+                    placeholder="Ask AI Mentor a question..."
+                    value={aiInput}
+                    onChange={(e) => setAiInput(e.target.value)}
+                    className="chat-bar-input"
+                  />
+                </form>
+              </div>
+            )}
           </div>
         </div>
+
       </div>
     </StyledWorkspace>
   );
 };
 
+// Pulse keyframes for ambient console states
+const pulseGreen = keyframes`
+  0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+  50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.35); }
+  100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+`;
+
+const pulseRed = keyframes`
+  0% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.15); }
+  50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.45); }
+  100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.15); }
+`;
+
 const StyledWorkspace = styled.div`
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 4rem);
-  background: ${props => props.themeMode === 'dark' ? '#09090c' : '#f9f9fb'};
-  color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
+  height: 100vh;
+  background-color: #07080B;
+  color: #E2E8F0;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: -0.01em;
 
-  .workspace-header {
-    background: ${props => props.themeMode === 'dark' ? '#111116' : '#fff'};
-    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
-    padding: 10px 20px;
+  /* Global Color & Layout Variables */
+  --bg-obsidian: #07080B;
+  --bg-panel-tint: rgba(15, 17, 26, 0.7);
+  --border-glass: rgba(34, 38, 56, 0.5);
+  --text-dim: #707E94;
+  --color-neon-purple: #818CF8;
+  --color-neon-magenta: #C084FC;
+  --color-emerald: #10B981;
+  --color-crimson: #EF4444;
+
+  /* Ambient radial glows behind dashboard panels */
+  .ambient-background-glow {
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ambient-background-glow.glow-1 {
+    background: radial-gradient(circle, var(--color-neon-purple), transparent 70%);
+    top: 10%;
+    left: 20%;
+  }
+
+  .ambient-background-glow.glow-2 {
+    background: radial-gradient(circle, var(--color-neon-magenta), transparent 70%);
+    bottom: 15%;
+    right: 15%;
+  }
+
+  /* ========================================== */
+  /* 1. Global Floating Capsule Header         */
+  /* ========================================== */
+  .workspace-header-bar {
+    height: 56px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    background: var(--bg-panel-tint);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    margin: 12px 16px;
+    padding: 0 16px;
+    border-radius: 12px;
+    gap: 16px;
+    z-index: 10;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 
-  .back-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: ${props => props.themeMode === 'dark' ? '#fff' : '#333'};
-    padding: 6px 14px;
-    border-radius: 4px;
+  .nav-back-btn {
+    background: none;
+    border: 1px solid var(--border-glass);
+    color: #E2E8F0;
+    padding: 6px 12px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.85rem;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: auto;
-    box-shadow: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  .action-btn {
+  .nav-back-btn:hover {
+    background-color: var(--border-glass);
+    color: #FFF;
+    transform: translateX(-2px);
+  }
+
+  .workspace-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .workspace-breadcrumbs .crumb {
+    color: var(--text-dim);
+  }
+
+  .workspace-breadcrumbs .crumb.active {
+    color: #FFF;
+  }
+
+  .workspace-breadcrumbs .divider {
+    color: var(--border-glass);
+  }
+
+  .autosave-indicator {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    background-color: rgba(34, 38, 56, 0.4);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-left: auto;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* High contrast action capsules */
+  .action-capsule-btn {
     border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
     color: white;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.8rem;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 0.85rem;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: auto;
-    box-shadow: none;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  .action-btn.run { background: #6366f1; }
-  .action-btn.reset { background: rgba(255, 0, 0, 0.15); border: 1px solid rgba(255, 0, 0, 0.3); color: #ff4d4d; }
-  .action-btn.solution { background: #27272a; border: 1px solid #3f3f46; }
-  .action-btn.submit { background: #10b981; color: #000; }
+  .action-capsule-btn.run {
+    background: linear-gradient(135deg, #818CF8, #C084FC);
+    box-shadow: 0 2px 10px rgba(129, 140, 248, 0.3);
+  }
 
-  .panels-container {
-    display: grid;
-    grid-template-columns: 320px 1fr 420px;
+  .action-capsule-btn.run:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(129, 140, 248, 0.5);
+  }
+
+  .action-capsule-btn.reset {
+    background-color: rgba(34, 38, 56, 0.6);
+    border: 1px solid var(--border-glass);
+  }
+
+  .action-capsule-btn.reset:hover {
+    background-color: var(--border-glass);
+    transform: translateY(-1px);
+  }
+
+  .action-capsule-btn.solution {
+    background-color: rgba(34, 38, 56, 0.6);
+    border: 1px solid var(--border-glass);
+  }
+
+  .action-capsule-btn.solution:hover {
+    background-color: var(--border-glass);
+    transform: translateY(-1px);
+  }
+
+  .action-capsule-btn.submit {
+    background: linear-gradient(135deg, #38BDF8, #818CF8);
+    box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+  }
+
+  .action-capsule-btn.submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+  }
+
+  /* ========================================== */
+  /* 2. Bento Panel grid layout                  */
+  /* ========================================== */
+  .workspace-panes-wrapper {
     flex: 1;
+    display: flex;
+    height: calc(100% - 80px);
+    background-color: transparent;
+    position: relative;
     overflow: hidden;
+    padding: 0 16px 16px 16px;
+    gap: 8px;
+    z-index: 2;
   }
 
-  .panel {
+  .pane-panel {
     display: flex;
     flex-direction: column;
-    border-right: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
+    height: 100%;
+    background: var(--bg-panel-tint);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
     overflow: hidden;
+    transition: box-shadow 0.3s ease;
   }
 
-  .panel-header {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.02)'};
-    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,0.08)'};
-    padding: 10px 15px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: #888;
+  /* Split dragging resizers */
+  .drag-resize-handle {
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    background-color: transparent;
+    transition: background-color 0.25s ease;
+    z-index: 5;
+    margin: 0 -3px;
+  }
+
+  .drag-resize-handle:hover {
+    background-color: rgba(129, 140, 248, 0.2);
+  }
+
+  /* Collapsed trigger styling */
+  .collapsed-left-trigger {
+    width: 18px;
+    height: 100%;
+    background: var(--bg-panel-tint);
+    border: 1px solid var(--border-glass);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .collapsed-left-trigger:hover {
+    color: #FFF;
+    background-color: var(--border-glass);
+    box-shadow: 0 0 10px rgba(129, 140, 248, 0.25);
+  }
+
+  /* ========================================== */
+  /* Instructions Panel COLLAPSE slide transition*/
+  /* ========================================== */
+  .instructions-panel {
+    flex-shrink: 0;
+    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+  }
+
+  .instructions-panel.collapsed {
+    width: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    border: none;
+  }
+
+  .panel-header-toolbar {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-glass);
+    background-color: rgba(34, 38, 56, 0.2);
+  }
+
+  .panel-label {
+    font-size: 0.75rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .chevron-collapse-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.7rem;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .chevron-collapse-btn:hover {
+    color: #FFF;
+    background-color: var(--border-glass);
+  }
+
+  .panel-scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .instructions-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .project-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #FFF;
+    letter-spacing: -0.02em;
+  }
+
+  .difficulty-badge {
+    font-size: 0.65rem;
+    background-color: rgba(129, 140, 248, 0.15);
+    color: #A5B4FC;
+    border: 1px solid rgba(129, 140, 248, 0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    width: fit-content;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
-  .flex-header {
+  .objective-text {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #CBD5E1;
+  }
+
+  .requirements-section {
+    border-top: 1px solid var(--border-glass);
+    padding-top: 20px;
+  }
+
+  .section-title {
+    margin: 0 0 12px 0;
+    font-size: 0.8rem;
+    font-weight: 750;
+    color: #F1F5F9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .requirements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .requirement-checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #94A3B8;
+    transition: color 0.2s;
+  }
+
+  .requirement-checkbox-item:hover {
+    color: #F1F5F9;
+  }
+
+  .requirement-checkbox-item input {
+    margin-top: 4px;
+  }
+
+  .milestones-section {
+    border-top: 1px solid var(--border-glass);
+    padding-top: 20px;
+  }
+
+  .milestone-detail-card {
+    background-color: rgba(34, 38, 56, 0.15);
+    border: 1px solid var(--border-glass);
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .milestone-title {
+    font-size: 0.85rem;
+    color: #FFF;
+  }
+
+  .milestone-desc {
+    margin: 6px 0 0 0;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  /* ========================================== */
+  /* Center Panel - Premium Code Editor         */
+  /* ========================================== */
+  .code-editor-panel {
+    flex: 1;
+    background: var(--bg-obsidian) !important;
+  }
+
+  .editor-tab-row {
+    height: 48px;
+    display: flex;
+    background-color: var(--bg-panel-tint);
+    border-bottom: 1px solid var(--border-glass);
+    padding: 0 12px;
+    align-items: flex-end;
+  }
+
+  .editor-tab-item {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    transition: color 0.25s ease;
+  }
+
+  .editor-tab-item:hover {
+    color: #FFF;
+  }
+
+  .editor-tab-item.active {
+    color: #FFF;
+  }
+
+  /* Neon underline sliding tab accent */
+  .tab-neon-accent {
+    position: absolute;
+    bottom: -1px;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: var(--color-neon-purple);
+    box-shadow: 0 0 12px var(--color-neon-purple);
+    border-radius: 20px;
+  }
+
+  .editor-viewport-container {
+    flex: 1;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .line-gutter {
+    width: 52px;
+    padding-top: 20px;
+    font-family: 'Fira Code', 'Geist Mono', Consolas, monospace;
+    font-size: 0.8rem;
+    color: #4A5568;
+    text-align: right;
+    padding-right: 16px;
+    border-right: 1px solid var(--border-glass);
+    background-color: var(--bg-obsidian);
+    user-select: none;
+  }
+
+  .gutter-num {
+    height: 22px;
+  }
+
+  .ide-code-textarea {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #F8FAFC;
+    font-family: 'Fira Code', 'Geist Mono', Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 22px;
+    padding: 20px;
+    resize: none;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .editor-solution-overlay {
+    position: absolute;
+    top: 0;
+    left: 52px;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(7, 8, 11, 0.98);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 8;
+  }
+
+  .overlay-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 16px;
   }
 
-  .instructions-body {
-    padding: 20px;
-    overflow-y: auto;
-    flex: 1;
+  .overlay-badge {
+    color: var(--color-emerald);
+    font-size: 0.8rem;
+    font-weight: 750;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
 
-  .instructions-body h3 {
-    margin-top: 0;
-    font-size: 1.25rem;
-    color: #fff;
-  }
-
-  .goal-desc {
-    font-size: 0.85rem;
-    color: #ccc;
-    line-height: 1.5;
-  }
-
-  .checklist-box {
-    margin-top: 25px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 8px;
-  }
-
-  .checklist-box h4 {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #6366f1;
-  }
-
-  .checklist-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    color: #ccc;
-    cursor: pointer;
-  }
-
-  .checklist-item input {
-    margin-top: 3px;
-  }
-
-  .file-tabs {
-    display: flex;
-    gap: 5px;
-  }
-
-  .file-tab {
+  .close-overlay-btn {
     background: none;
     border: none;
-    color: #888;
-    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-size: 1.5rem;
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-weight: bold;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: auto;
-    box-shadow: none;
+    transition: color 0.2s;
   }
 
-  .file-tab.active {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+  .close-overlay-btn:hover {
+    color: #FFF;
   }
 
-  .editor-pane {
-    background: ${props => props.themeMode === 'dark' ? '#0d0d11' : '#fff'};
+  .overlay-pre {
+    font-family: 'Fira Code', 'Geist Mono', monospace;
+    font-size: 0.8rem;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    border-radius: 12px;
+    color: #CBD5E1;
+    white-space: pre-wrap;
+    border: 1px solid var(--border-glass);
   }
 
-  .editor-container {
+  /* ========================================== */
+  /* Right Panel - Viewport & AI Chat           */
+  /* ========================================== */
+  .right-viewport-panel {
+    border-left: 1px solid var(--border-glass);
+    flex-shrink: 0;
+  }
+
+  .right-panel-tabs {
+    height: 48px;
+    display: flex;
+    background-color: var(--bg-panel-tint);
+    border-bottom: 1px solid var(--border-glass);
+  }
+
+  .right-tab-btn {
     flex: 1;
-    position: relative;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.8rem;
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.2s ease;
+  }
+
+  .right-tab-btn:hover {
+    color: #FFF;
+  }
+
+  .right-tab-btn.active {
+    color: #FFF;
+    border-bottom-color: var(--color-neon-purple);
+    background-color: rgba(34, 38, 56, 0.2);
+  }
+
+  .right-panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
   }
 
-  .code-textarea {
-    width: 100%;
+  .live-preview-container {
+    display: flex;
+    flex-direction: column;
     height: 100%;
-    background: none;
-    border: none;
-    color: ${props => props.themeMode === 'dark' ? '#f8fafc' : '#333'};
-    font-family: monospace;
-    font-size: 0.95rem;
-    padding: 20px;
-    box-sizing: border-box;
-    resize: none;
-    outline: none;
-    line-height: 1.5;
+    overflow: hidden;
+    position: relative;
   }
 
-  .solution-overlay {
+  .iframe-viewport-wrapper {
+    flex: 1;
+    background-color: #FFF;
+    min-height: 200px;
+    position: relative;
+    border-radius: 8px;
+    margin: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-glass);
+  }
+
+  .live-preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #FFF;
+  }
+
+  .empty-viewport-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-dim);
+    background-color: #0E0F13;
+    font-size: 0.85rem;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .empty-viewport-placeholder .icon {
+    font-size: 2.2rem;
+    color: var(--color-neon-purple);
+    margin-bottom: 12px;
+  }
+
+  /* Console Panel with state-driven pulsing glow auras */
+  .virtual-console-panel {
+    height: 150px;
+    background-color: #08090C;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-top: 1px solid var(--border-glass);
+  }
+
+  .console-header-bar {
+    background-color: rgba(34, 38, 56, 0.2);
+    border-bottom: 1px solid var(--border-glass);
+    padding: 8px 16px;
+    font-size: 0.7rem;
+    font-weight: 750;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .console-log-lines {
+    flex: 1;
+    padding: 12px 16px;
+    overflow-y: auto;
+    font-family: 'Fira Code', 'Geist Mono', monospace;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 2;
+  }
+
+  .log-line-item {
+    color: #A5B4FC;
+  }
+
+  /* Neon pulsing ambient element backing the console log */
+  .console-aura-glow {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(13, 13, 17, 0.95);
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    border-left: 3px solid #6366f1;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    border-radius: 0 0 16px 16px;
+    z-index: 1;
+    
+    ${props => props.executionStatus === 'success' && css`
+      animation: ${pulseGreen} 3s infinite ease-in-out;
+      border: 1px solid var(--color-emerald);
+    `}
+
+    ${props => props.executionStatus === 'error' && css`
+      animation: ${pulseRed} 3s infinite ease-in-out;
+      border: 1px solid var(--color-crimson);
+    `}
   }
 
-  .solution-overlay pre {
-    color: #ccc;
-    font-family: monospace;
-    font-size: 0.85rem;
-  }
-
-  .right-split {
-    border-right: none;
-  }
-
-  .split-half {
-    flex: 1;
+  /* AI Mentor Container */
+  .ai-mentor-container {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-  }
-
-  .preview-sub {
-    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
-  }
-
-  .preview-viewport {
-    flex: 1;
-    background: #fff;
-    position: relative;
-  }
-
-  .preview-iframe {
-    width: 100%;
     height: 100%;
-    border: none;
+    background-color: #08090C;
   }
 
-  .empty-preview {
-    position: absolute;
-    inset: 0;
+  .mentor-chat-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    background: #1e1e24;
-    color: #666;
-    font-size: 0.85rem;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-glass);
+    background-color: var(--bg-panel-tint);
   }
 
-  .terminal-logs {
-    background: #000;
-    height: 80px;
-    overflow-y: auto;
-    font-family: monospace;
+  .mentor-status {
+    font-size: 0.7rem;
+    color: var(--color-emerald);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .get-hint-action {
+    background-color: rgba(129, 140, 248, 0.15);
+    color: #A5B4FC;
+    border: 1px solid rgba(129, 140, 248, 0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
     font-size: 0.75rem;
-    padding: 10px;
-    box-sizing: border-box;
-    color: #10b981;
+    font-weight: 700;
+    transition: all 0.2s;
   }
 
-  .chat-history {
+  .get-hint-action:hover {
+    background-color: rgba(129, 140, 248, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .chat-dialog-history {
     flex: 1;
+    padding: 20px;
     overflow-y: auto;
-    padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    background: ${props => props.themeMode === 'dark' ? '#111116' : '#f4f4f7'};
+    gap: 14px;
   }
 
-  .chat-bubble {
-    padding: 10px 14px;
-    border-radius: 8px;
-    max-width: 85%;
-    font-size: 0.85rem;
-    line-height: 1.4;
-  }
-
-  .chat-bubble.mentor {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    align-self: flex-start;
-  }
-
-  .chat-bubble.student {
-    background: rgba(99, 102, 241, 0.15);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    align-self: flex-end;
-  }
-
-  .bubble-author {
-    font-size: 0.7rem;
-    font-weight: bold;
-    color: #888;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .chat-input-form {
+  .dialog-bubble {
     display: flex;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    gap: 8px;
+    flex-direction: column;
+    max-width: 80%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.5;
   }
 
-  .chat-input {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 8px 12px;
-    color: #fff;
+  .dialog-bubble.mentor {
+    align-self: flex-start;
+    background-color: var(--bg-panel-tint);
+    border: 1px solid var(--border-glass);
+    color: #E2E8F0;
+  }
+
+  .dialog-bubble.student {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--color-neon-purple), var(--color-neon-magenta));
+    color: #FFF;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(129, 140, 248, 0.25);
+  }
+
+  .bubble-sender {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .dialog-bubble.student .bubble-sender {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .bubble-text {
+    margin: 0;
+  }
+
+  .chat-input-form-bar {
+    padding: 16px;
+    border-top: 1px solid var(--border-glass);
+    background-color: var(--bg-panel-tint);
+  }
+
+  .chat-bar-input {
+    width: 100%;
+    background-color: #08090C !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 20px !important;
+    padding: 10px 18px !important;
+    font-size: 0.85rem !important;
+    color: #FFF !important;
     outline: none;
-    font-size: 0.85rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
   }
 
-  .chat-submit-btn {
-    background: #6366f1;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 0.85rem;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: auto;
-    box-shadow: none;
-  }
-
-  .hint-btn {
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    color: #6366f1;
-    border-radius: 3px;
-    font-size: 0.75rem;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-weight: bold;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: auto;
-    box-shadow: none;
+  .chat-bar-input:focus {
+    border-color: var(--color-neon-purple) !important;
   }
 `;
 

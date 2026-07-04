@@ -228,5 +228,167 @@ export const PROJECTS_CURRICULUM = [
       'styles.css': '',
       'script.js': ''
     }
+  },
+
+  // TypeScript Course
+  {
+    id: 'ts-typing',
+    course: 'TypeScript',
+    title: 'Type Safety System',
+    difficulty: 'Intermediate',
+    estTime: '4 hours',
+    icon: '📘',
+    prereqId: null,
+    objective: 'Convert a dynamic JavaScript calculator config to static interfaces and generics.',
+    requirements: [
+      { id: 'ts1', text: 'Create Calculator interfaces definitions' },
+      { id: 'ts2', text: 'Export generic return structures' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Type Mapping', desc: 'Define key layouts typing and error guards.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>TS Studio</h2>',
+      'styles.css': '',
+      'script.js': 'interface Config { label: string; }'
+    }
+  },
+
+  // Git Course
+  {
+    id: 'git-cli',
+    course: 'Git',
+    title: 'Git Version Control CLI',
+    difficulty: 'Beginner',
+    estTime: '2 hours',
+    icon: '🐙',
+    prereqId: null,
+    objective: 'Simulate git repositories initialization, commits creation, and branches merging.',
+    requirements: [
+      { id: 'g1', text: 'Run git init and configure local email commits' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Local Commits', desc: 'Commit files to git HEAD.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>Git CLI Simulator</h2>',
+      'styles.css': '',
+      'script.js': 'console.log("Git ready");'
+    }
+  },
+
+  // GitHub Course
+  {
+    id: 'github-pages',
+    course: 'GitHub',
+    title: 'Actions CI/CD Workflows',
+    difficulty: 'Intermediate',
+    estTime: '3 hours',
+    icon: '🐱',
+    prereqId: 'git-cli',
+    objective: 'Create GitHub Pages workflows triggering test checks on commits push events.',
+    requirements: [
+      { id: 'gh1', text: 'Map jobs actions scripts steps' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'CI Pipeline', desc: 'Configure runner actions triggers.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>CI Dashboard</h2>',
+      'styles.css': '',
+      'script.js': ''
+    }
+  },
+
+  // Docker Course
+  {
+    id: 'docker-container',
+    course: 'Docker',
+    title: 'Dockerizing Web Apps',
+    difficulty: 'Intermediate',
+    estTime: '5 hours',
+    icon: '🐳',
+    prereqId: null,
+    objective: 'Create a multi-stage Dockerfile bundling Node static server builds.',
+    requirements: [
+      { id: 'd1', text: 'Define standard Dockerfile base commands' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Image Builds', desc: 'Run containers layer caches optimizations.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>Docker Console</h2>',
+      'styles.css': '',
+      'script.js': 'FROM node:alpine'
+    }
+  },
+
+  // Express Course
+  {
+    id: 'express-server',
+    course: 'Express',
+    title: 'Backend Middleware Gateway',
+    difficulty: 'Intermediate',
+    estTime: '4 hours',
+    icon: '⚡',
+    prereqId: 'node-api',
+    objective: 'Implement custom logging and authorization routers in Express.',
+    requirements: [
+      { id: 'ex1', text: 'Define request logger intercepts' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Middleware Chains', desc: 'Assemble route pipeline handlers.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>Express Router</h2>',
+      'styles.css': '',
+      'script.js': ''
+    }
+  },
+
+  // Next.js Course
+  {
+    id: 'nextjs-app',
+    course: 'Next.js',
+    title: 'SSR Metric Dashboard App',
+    difficulty: 'Advanced',
+    estTime: '8 hours',
+    icon: '▲',
+    prereqId: 'react-dashboard',
+    objective: 'Configure server components loading dynamic metrics with routing files.',
+    requirements: [
+      { id: 'nx1', text: 'Build Next.js layouts route trees' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'SSR Loading', desc: 'Generate static site caching fallbacks.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>Next.js Viewport</h2>',
+      'styles.css': '',
+      'script.js': ''
+    }
+  },
+
+  // Python Course
+  {
+    id: 'python-scripts',
+    course: 'Python',
+    title: 'Data Scraping Engine',
+    difficulty: 'Beginner',
+    estTime: '6 hours',
+    icon: '🐍',
+    prereqId: null,
+    objective: 'Implement page requests scripts parsing tags with BeautifulSoup.',
+    requirements: [
+      { id: 'p1', text: 'Create html parser calls' }
+    ],
+    milestones: [
+      { id: 'm1', title: 'Scripting Parser', desc: 'Collect target link arrays.' }
+    ],
+    starterCode: {
+      'index.html': '<h2>Python Terminal</h2>',
+      'styles.css': '',
+      'script.js': 'import urllib.request'
+    }
   }
 ];

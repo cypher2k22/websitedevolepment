@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import { PROJECTS_CURRICULUM } from '../data/curriculumData';
 
 const Admin = () => {
   const { user, login, addToast } = useContext(AuthContext);
@@ -11,10 +12,17 @@ const Admin = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState('users');
 
   const mockStudents = [
-    { id: 1, name: 'Alice Dev', email: 'alice@gmail.com', enrolled: ['html-calculator'], completed: ['html-calculator'], xp: 5400 },
-    { id: 2, name: 'Bob Stack', email: 'bob@gmail.com', enrolled: ['html-calculator'], completed: [], xp: 4800 }
+    { id: 1, name: 'Alice Dev', email: 'alice@gmail.com', enrolled: ['html-calculator', 'css-styling'], completed: ['html-calculator'], xp: 5400 },
+    { id: 2, name: 'Bob Coder', email: 'bob@gmail.com', enrolled: ['html-calculator'], completed: [], xp: 4800 },
+    { id: 3, name: 'Dave Stack', email: 'dave@gmail.com', enrolled: [], completed: [], xp: 2100 }
+  ];
+
+  const mockClaims = [
+    { id: 1, name: 'Alice Dev', course: 'HTML', date: '2026-07-01', status: 'Approved' },
+    { id: 2, name: 'Bob Coder', course: 'CSS', date: '2026-07-02', status: 'Pending' }
   ];
 
   const handleAdminSignIn = (e) => {
@@ -32,8 +40,8 @@ const Admin = () => {
   if (!isAdminAuthenticated) {
     return (
       <StyledAuth themeMode={theme}>
-        <div className="auth-card">
-          <h2>Instructor Admin Login</h2>
+        <div className="auth-card glass-panel">
+          <h2>Instructor Admin Console</h2>
           <p>Please enter your instructor credentials to view system analytics.</p>
           <form onSubmit={handleAdminSignIn}>
             <div className="form-group">
@@ -65,70 +73,154 @@ const Admin = () => {
 
   return (
     <StyledDashboard themeMode={theme}>
-      <h1 className="admin-title">Instructor Console</h1>
+      <h1 className="admin-title">Instructor Admin Console</h1>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>Configure learning tracks, manage credentials, and view system metrics.</p>
 
-      <div className="admin-grid">
-        <div className="left-pane">
-          <div className="admin-card">
-            <h3>System Statistics</h3>
-            <div className="stats-row">
-              <div className="stat-item">
-                <span className="value">{mockStudents.length}</span>
-                <span className="label">Registered Students</span>
-              </div>
-              <div className="stat-item">
-                <span className="value">1</span>
-                <span className="label">Certificates Claimed</span>
-              </div>
-              <div className="stat-item">
-                <span className="value">10</span>
-                <span className="label">Curriculum Projects</span>
-              </div>
-            </div>
-          </div>
+      {/* Stats Cards */}
+      <div className="stats-row">
+        <div className="stat-item glass-panel">
+          <span className="value">{mockStudents.length}</span>
+          <span className="label">Registered Students</span>
+        </div>
+        <div className="stat-item glass-panel">
+          <span className="value">16</span>
+          <span className="label">Curriculum Tracks</span>
+        </div>
+        <div className="stat-item glass-panel">
+          <span className="value">{PROJECTS_CURRICULUM.length}</span>
+          <span className="label">Milestone Projects</span>
+        </div>
+        <div className="stat-item glass-panel">
+          <span className="value">2</span>
+          <span className="label">Certificates Issued</span>
+        </div>
+      </div>
 
-          <div className="admin-card">
-            <h3>Registered Student Directory</h3>
-            <div className="student-list">
-              {mockStudents.map(student => (
-                <div key={student.id} className="student-row">
-                  <div>
-                    <strong>{student.name}</strong>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#888' }}>{student.email}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span className="xp-label">{student.xp} XP</span>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#aaa' }}>
-                      Enrolled: {student.enrolled.length} | Completed: {student.completed.length}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Main split view */}
+      <div className="admin-layout">
+        
+        {/* Left tabs menu */}
+        <div className="sidebar glass-panel">
+          <button className={`tab-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
+            👥 Students Directory
+          </button>
+          <button className={`tab-link ${activeTab === 'curriculum' ? 'active' : ''}`} onClick={() => setActiveTab('curriculum')}>
+            📚 Curriculum roadmaps
+          </button>
+          <button className={`tab-link ${activeTab === 'certificates' ? 'active' : ''}`} onClick={() => setActiveTab('certificates')}>
+            🎓 Certificates claims
+          </button>
         </div>
 
-        <div className="right-pane">
-          <div className="admin-card">
-            <h3>System Settings</h3>
-            <p style={{ fontSize: '0.85rem', color: '#aaa', lineHeight: '1.4', marginBottom: '15px' }}>
-              You are logged in with authority credentials. Manage courses, databases, and configuration settings.
-            </p>
-            <button 
-              className="admin-btn"
-              onClick={() => { addToast('Seeded databases updated successfully.', 'success'); }}
-              style={{ width: '100%', marginBottom: '10px' }}
-            >
-              Force Seed Curriculum
-            </button>
-            <button 
-              className="admin-btn secondary"
-              onClick={() => navigate('/dashboard')}
-              style={{ width: '100%' }}
-            >
-              Go to Student Dashboard
-            </button>
-          </div>
+        {/* Center content panel */}
+        <div className="content-panel glass-panel">
+          
+          {activeTab === 'users' && (
+            <div>
+              <h3>Student Directory</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>Manage user access levels and view student progress details.</p>
+              
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
+                    <th style={{ padding: '12px' }}>Name</th>
+                    <th style={{ padding: '12px' }}>Email</th>
+                    <th style={{ padding: '12px' }}>XP Level</th>
+                    <th style={{ padding: '12px' }}>Enrollments</th>
+                    <th style={{ padding: '12px' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockStudents.map(student => (
+                    <tr key={student.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{student.name}</td>
+                      <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{student.email}</td>
+                      <td style={{ padding: '12px', color: 'var(--primary)', fontWeight: 'bold' }}>{student.xp} XP</td>
+                      <td style={{ padding: '12px' }}>{student.enrolled.length} active</td>
+                      <td style={{ padding: '12px' }}>
+                        <button 
+                          onClick={() => addToast(`Simulated resetting password for ${student.name}`, 'info')}
+                          style={{ background: 'none', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '4px', padding: '4px 10px', fontSize: '0.8rem', cursor: 'pointer' }}
+                        >
+                          Reset Pass
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === 'curriculum' && (
+            <div>
+              <h3>Curriculum roadmaps</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>Configure syllabus structures, instructions starter code, and milestones.</p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {PROJECTS_CURRICULUM.map(proj => (
+                  <div key={proj.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-color)', padding: '15px 20px', borderRadius: '8px' }}>
+                    <div>
+                      <strong>{proj.title}</strong>
+                      <span style={{ fontSize: '0.75rem', background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '2px 8px', borderRadius: '4px', marginLeft: '10px', fontWeight: 'bold' }}>{proj.technology}</span>
+                    </div>
+                    <button 
+                      onClick={() => addToast(`Editing is locked in simulation mode.`, 'warning')}
+                      style={{ background: 'none', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '4px', padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer' }}
+                    >
+                      Configure
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'certificates' && (
+            <div>
+              <h3>Certificate Claims</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>Approve or reject verified syllabus completion certificate requests.</p>
+              
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
+                    <th style={{ padding: '12px' }}>Student</th>
+                    <th style={{ padding: '12px' }}>Curriculum Path</th>
+                    <th style={{ padding: '12px' }}>Request Date</th>
+                    <th style={{ padding: '12px' }}>Status</th>
+                    <th style={{ padding: '12px' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockClaims.map(claim => (
+                    <tr key={claim.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{claim.name}</td>
+                      <td style={{ padding: '12px' }}>{claim.course}</td>
+                      <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{claim.date}</td>
+                      <td style={{ padding: '12px' }}>
+                        <span style={{ color: claim.status === 'Approved' ? '#10ac84' : '#f59e0b', fontWeight: 'bold' }}>
+                          ● {claim.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        {claim.status === 'Pending' ? (
+                          <button 
+                            onClick={() => addToast(`Certificate request approved.`, 'success')}
+                            style={{ background: '#10ac84', border: 'none', color: '#fff', borderRadius: '4px', padding: '4px 10px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}
+                          >
+                            Approve
+                          </button>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No action required</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
         </div>
       </div>
     </StyledDashboard>
@@ -140,29 +232,28 @@ const StyledAuth = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 80vh;
-  background: ${props => props.themeMode === 'dark' ? '#09090c' : '#f9f9fb'};
   color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
 
   .auth-card {
-    width: 360px;
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255,255,255,0.03)' : '#fff'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 380px;
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
   }
 
   .auth-card h2 {
-    margin-top: 0;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 800;
+    margin-bottom: 8px;
+    text-align: center;
   }
 
   .auth-card p {
     font-size: 0.85rem;
-    color: #888;
-    line-height: 1.4;
-    margin-bottom: 20px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 25px;
   }
 
   .form-group {
@@ -173,34 +264,21 @@ const StyledAuth = styled.div`
   }
 
   .form-group label {
-    font-weight: 600;
-  }
-
-  .form-group input {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#fff'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0,0,0,0.15)'};
-    color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
-    padding: 10px;
-    border-radius: 4px;
-    outline: none;
+    font-weight: bold;
   }
 
   .login-btn {
     width: 100%;
     margin-top: 20px;
-    background-image: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: var(--primary);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 12px;
     font-weight: bold;
     cursor: pointer;
-    font-size: 0.85rem;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: auto;
-    box-shadow: none;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px var(--primary-glow);
   }
 `;
 
@@ -208,115 +286,101 @@ const StyledDashboard = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-  color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
-  font-family: system-ui, sans-serif;
-  min-height: 80vh;
+  min-height: 85vh;
+  
+  --text-muted: ${props => props.themeMode === 'dark' ? '#a1a1aa' : '#71717a'};
 
   .admin-title {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #6366f1, #00d2ff);
+    background: linear-gradient(135deg, #00d2ff, #af40ff);
     WebkitBackgroundClip: text;
     WebkitTextFillColor: transparent;
-    margin-bottom: 35px;
-  }
-
-  .admin-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 30px;
-  }
-
-  @media (max-width: 992px) {
-    .admin-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .admin-card {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.02)'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.08)'};
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 30px;
-  }
-
-  .admin-card h3 {
-    margin-top: 0;
-    font-size: 1.25rem;
-    border-bottom: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0,0,0,0.08)'};
-    padding-bottom: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
   }
 
   .stats-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
   }
 
   .stat-item {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.01)' : 'rgba(0,0,0,0.01)'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0,0,0,0.05)'};
-    border-radius: 8px;
-    padding: 15px;
+    padding: 24px;
+    border-radius: 12px;
     text-align: center;
   }
 
   .stat-item .value {
     display: block;
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #6366f1;
-    margin-bottom: 5px;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 4px;
   }
 
   .stat-item .label {
-    font-size: 0.75rem;
-    color: #aaa;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
   }
 
-  .student-list {
+  .admin-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+  }
+
+  @media (max-width: 992px) {
+    .admin-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .sidebar {
+    padding: 20px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    height: fit-content;
   }
 
-  .student-row {
-    background: ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.01)' : '#fff'};
-    border: 1px solid ${props => props.themeMode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0,0,0,0.08)'};
-    border-radius: 6px;
-    padding: 12px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .xp-label {
-    font-weight: bold;
-    color: #6366f1;
-  }
-
-  .admin-btn {
-    background-image: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: white;
+  .tab-link {
+    width: 100%;
+    text-align: left;
+    background: none;
     border: none;
-    border-radius: 6px;
-    padding: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: var(--text-muted);
     font-weight: bold;
     cursor: pointer;
-    font-size: 0.85rem;
-    position: static;
-    transform: none;
-    height: auto;
-    min-width: auto;
-    box-shadow: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    outline: none;
   }
 
-  .admin-btn.secondary {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: ${props => props.themeMode === 'dark' ? '#fff' : '#000'};
+  .tab-link.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: #fff;
+    border-left: 3px solid var(--primary);
+  }
+
+  .tab-link:hover:not(.active) {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .content-panel {
+    padding: 30px;
+    border-radius: 16px;
+  }
+
+  .content-panel h3 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 6px;
   }
 `;
 
