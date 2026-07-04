@@ -1,5 +1,4 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
@@ -8,6 +7,7 @@ import authRouter from './routes/auth.js';
 import projectsRouter from './routes/projects.js';
 import progressRouter from './routes/progress.js';
 import aiRouter from './routes/ai.js';
+import { initDb } from './db/index.js';
 
 dotenv.config();
 
@@ -29,11 +29,12 @@ app.get('/', (req, res) => {
 });
 
 // Database connection
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/codejourney';
-mongoose.connect(mongoURI)
-  .then(() => console.log('MongoDB connected successfully.'))
+initDb()
+  .then(() => {
+    console.log('PostgreSQL connected and schema ready.');
+  })
   .catch(err => {
-    console.warn('MongoDB connection failed. Using local mockup fallback storage mode.');
+    console.error('PostgreSQL initialization failed:', err.message);
   });
 
 if (process.env.NODE_ENV !== 'production') {

@@ -1,14 +1,41 @@
 import express from 'express';
-import Project from '../models/Project.js';
+import { query } from '../db/index.js';
 
 const router = express.Router();
 
-// Get all curriculum projects
+const toSlug = (title) => {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+};
+
+// Get all curriculum projects along with their milestones
 router.get('/', async (req, res) => {
   try {
-    const projects = await Project.find({});
+    const projectsResult = await query('SELECT * FROM projects');
+    const milestonesResult = await query('SELECT * FROM milestones');
+
+    const projects = projectsResult.rows.map(p => {
+      const milestones = milestonesResult.rows
+        .filter(m => m.project_id === p.id)
+        .map(m => ({
+          id: m.id,
+          title: m.title,
+          desc: m.desc_text
+        }));
+
+      return {
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        difficulty: p.difficulty,
+        technology: p.technology,
+        starterCode: p.starter_code || {},
+        milestones
+      };
+    });
+
     res.json(projects);
   } catch (err) {
+    console.error('Fetch projects error:', err);
     res.status(500).send('Server Error');
   }
 });
@@ -16,7 +43,9 @@ router.get('/', async (req, res) => {
 // Seed projects curriculum
 router.get('/seed', async (req, res) => {
   try {
-    await Project.deleteMany({});
+    // Clear existing data
+    await query('DELETE FROM milestones');
+    await query('DELETE FROM projects');
     
     const seedData = [
       {
@@ -52,9 +81,32 @@ router.get('/seed', async (req, res) => {
       }
     ];
 
-    await Project.insertMany(seedData);
+    for (const project of seedData) {
+      const id = toSlug(project.title);
+      const starterCode = {
+        'index.html': `<!-- Starter code for ${project.title} -->`,
+        'styles.css': `/* Styling for ${project.title} */`,
+        'script.js': `// Script for ${project.title}`
+      };
+
+      await query(
+        `INSERT INTO projects (id, title, description, difficulty, technology, starter_code) 
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [id, project.title, project.description, project.difficulty, project.technology, JSON.stringify(starterCode)]
+      );
+
+      for (const milestone of project.milestones) {
+        await query(
+          `INSERT INTO milestones (id, project_id, title, desc_text) 
+           VALUES ($1, $2, $3, $4)`,
+          [milestone.id, id, milestone.title, milestone.desc]
+        );
+      }
+    }
+
     res.json({ msg: 'Database curriculum seeded successfully!' });
   } catch (err) {
+    console.error('Seed projects error:', err);
     res.status(500).send('Server Error');
   }
 });
